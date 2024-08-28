@@ -1,9 +1,11 @@
 import React, { useContext } from "react";
 import { assets } from "../../assets/assets";
 import { Context } from "../../context/context";
+import { grid } from 'ldrs'
 
 const Main = () => {
   const context = useContext(Context);
+  grid.register()
 
   if (!context) {
     return <div>Error: Context not available</div>;
@@ -18,6 +20,13 @@ const Main = () => {
     setInput,
     input,
   } = context;
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault(); // Optional: Prevent default behavior
+      onSent(input as string);
+    }
+  };
 
   return (
     <>
@@ -100,9 +109,11 @@ const Main = () => {
                   {loading ? (
                     <>
                       <div className="w-full flex-col gap-5">
-                        <hr className="rounded-md border-none bg-[#f6f7f8] bg-gradient-to-r from-[#9ed7ff] from-10% via-[#ffffff]  via-30% to-[#9ed7ff] to-90% h-5 mb-2"/>
-                        <hr className="rounded-md border-none bg-[#f6f7f8] bg-gradient-to-r from-[#9ed7ff] from-10% via-[#ffffff]  via-30% to-[#9ed7ff] to-90% h-5 mb-2"/>
-                        <hr className="rounded-md border-none bg-[#f6f7f8] bg-gradient-to-r from-[#9ed7ff] from-10% via-[#ffffff]  via-30% to-[#9ed7ff] to-90% h-5 mb-2"/>
+                        <l-grid
+                            size="100"
+                            speed="2.8" 
+                            color="#61ABFF" 
+                            ></l-grid>
                       </div>
                     </>
                   ) : (
@@ -128,6 +139,7 @@ const Main = () => {
               className="flex-1 bg-transparent border-none outline-none p-2 text-md"
               type="text"
               placeholder="Enter a prompt here ..."
+              onKeyDown={handleKeyDown} // Add the keydown handler here
             />
             <div className="flex items-center gap-3">
               <img

@@ -1,10 +1,10 @@
 
 export const geminiApiKey = import.meta.env.VITE_GEMINI_API_KEY
 
+// HarmCategory,
+// HarmBlockThreshold,
 import {
     GoogleGenerativeAI,
-    HarmCategory,
-    HarmBlockThreshold,
     GenerativeModel,
     GenerationConfig,
     ChatSession,
