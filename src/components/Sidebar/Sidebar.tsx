@@ -1,9 +1,17 @@
-import { useState } from "react";
+import { useContext } from "react";
 import { assets } from "../../assets/assets";
+import { Context } from "../../context/context";
 
 const Sidebar = () => {
-  const [extended, setExtended] = useState<boolean>(false);
 
+  const context = useContext(Context);
+
+  if (!context) {
+    return <div>Error: Context not available</div>;
+  }
+  
+  const {extended, setExtended } = context;
+  
   return (
     <div className={`min-h-screen inline-flex flex-col justify-between bg-[#f0f4f9] p-6 transition-all ease-in-out duration-300 ${
       extended ? "w-64" : "w-24"
@@ -13,7 +21,7 @@ const Sidebar = () => {
           className="w-5 h-5 block ml-2.5 cursor-pointer"
           src={assets.menu_icon}
           alt=""
-          onClick={()=>{setExtended((prev)=>!prev)}}
+          onClick={()=>{setExtended((prev: boolean)=>!prev)}}
         />
         <div className="mt-12 p-2 inline-flex items-center gap-2.5 px-2 py-2 bg-[#e6eaf1] rounded-[50px] text-sm text-gray-400 cursor-pointer">
           {/* // new Chat */}

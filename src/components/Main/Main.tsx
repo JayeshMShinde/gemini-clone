@@ -3,9 +3,12 @@ import { assets } from "../../assets/assets";
 import { Context } from "../../context/context";
 import { grid } from 'ldrs'
 
+// Register the grid loader
+grid.register();
+
+// Main component
 const Main: React.FC = () => {
   const context = useContext(Context);
-  grid.register()
 
   if (!context) {
     return <div>Error: Context not available</div>;
@@ -19,6 +22,7 @@ const Main: React.FC = () => {
     resultData,
     setInput,
     input,
+    extended,
   } = context;
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -47,11 +51,13 @@ const Main: React.FC = () => {
         setInput={setInput}
         onSent={onSent}
         handleKeyDown={handleKeyDown}
+        extended={extended}
       />
     </div>
   );
 };
 
+// Header component
 const Header: React.FC = () => (
   <header className="flex items-center justify-between p-5 text-md text-[#585858]">
     <p>Gemini</p>
@@ -59,6 +65,7 @@ const Header: React.FC = () => (
   </header>
 );
 
+// Initial view components
 const InitialView: React.FC = () => (
   <>
     <WelcomeMessage />
@@ -67,7 +74,7 @@ const InitialView: React.FC = () => (
 );
 
 const WelcomeMessage: React.FC = () => (
-  <div className="mt-12 mb-12 text-6xl text-[#c4c7c5] font-semibold p-5">
+  <div className="mt-12 mb-12 text-6xl text-[#c4c7c5] font-semibold p-2">
     <p>
       <span className="bg-clip-text bg-gradient-to-r from-[#4b90ff] to-[#ff5546] text-transparent">
         Hello, Dev.
@@ -78,7 +85,7 @@ const WelcomeMessage: React.FC = () => (
 );
 
 const SuggestionGrid: React.FC = () => (
-  <div className="grid grid-cols-4 gap-3 p-5">
+  <div className="grid grid-cols-4 gap-3 p-2">
     <SuggestionCard
       text="Show me how to build something by hand"
       icon={assets.compass_icon}
@@ -109,6 +116,7 @@ const SuggestionCard: React.FC<{ text: string; icon: string }> = ({ text, icon }
   </div>
 );
 
+// Result view components
 const ResultView: React.FC<{
   recentPrompt: string;
   loading: boolean;
@@ -146,13 +154,16 @@ const GeminiResponse: React.FC<{ loading: boolean; resultData: string }> = ({
   </div>
 );
 
+// Footer component
 const Footer: React.FC<{
   input: string;
   setInput: (value: string) => void;
   onSent: (value: string) => void;
   handleKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
-}> = ({ input, setInput, onSent, handleKeyDown }) => (
-  <footer className="fixed bottom-0 left-1/2 transform -translate-x-1/2 w-full max-w-[900px] px-0 py-5">
+  extended: boolean;
+}> = ({ input, setInput, onSent, handleKeyDown, extended }) => (
+  <footer className={`fixed bottom-0 ${extended ? 'left-64' : 'left-16'} right-0 transition-all duration-300 ease-in-out`}>
+  <div className="max-w-[900px] mx-auto px-4 py-3">
     <div className="flex items-center justify-between gap-4 bg-[#f0f4f9] px-2.5 py-2 rounded-[50px]">
       <input
         onChange={(e) => setInput(e.target.value)}
@@ -169,7 +180,7 @@ const Footer: React.FC<{
           className="w-5 cursor-pointer"
           src={assets.send_icon}
           alt="Send"
-          onClick={() => onSent(input as string)}
+          onClick={() => onSent(input)}
         />
       </div>
     </div>
@@ -177,7 +188,8 @@ const Footer: React.FC<{
       Gemini may display inaccurate info, including about people, so
       double-check its responses. Your privacy and Gemini Apps.
     </p>
-  </footer>
+  </div>
+</footer>
 );
 
 export default Main;

@@ -16,6 +16,8 @@ interface ContextType {
   resultData?: string;
   setresultData: React.Dispatch<React.SetStateAction<string | undefined>>;
   onSent: (prompt: string) => Promise<void>;
+  extended: boolean,
+  setExtended: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 // Create the context with a default undefined value
@@ -28,6 +30,7 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [showResult, setshowResult] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [resultData, setresultData] = useState<string>();
+  const [extended, setExtended] = useState<boolean>(false);
 
   const delayPara = (index: number, nextWord: string) =>{
     setTimeout(function () {
@@ -82,6 +85,8 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({ child
     resultData,
     setresultData,
     onSent,
+    extended,
+    setExtended,
   };
 
   return (
