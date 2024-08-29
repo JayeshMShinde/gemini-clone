@@ -1,50 +1,36 @@
-# React + TypeScript + Vite
+# Gemini Clone 🌟
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Welcome to the **Gemini Clone** repository! This project is a full-stack implementation of a chat application inspired by Gemini, featuring real-time AI conversations, dynamic chat history, and a user-friendly interface. The application is built using **Next.js** for the front end and leverages **WebSockets** for real-time communication with an AI model.
 
-Currently, two official plugins are available:
+## Features 🚀
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Real-Time AI Chat:** Communicate with an AI model in real-time using WebSocket connections.
+- **Dynamic Chat History:** View and manage chat history with options to start new conversations.
+- **Model Selection:** Choose between different AI models for tailored conversation experiences.
+- **User Authentication:** Secure login and profile management.
+- **Responsive Design:** Optimized for both desktop and mobile devices.
 
-## Expanding the ESLint configuration
+## Tech Stack 🛠️
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+- **Frontend:** Next.js, React
+- **Backend:** Node.js, Express (or any chosen backend)
+- **Real-Time Communication:** WebSocket
+- **State Management:** TanStack React Query
+- **Styling:** Tailwind CSS or Styled Components
 
-- Configure the top-level `parserOptions` property like this:
+## Setup & Installation 🛠️
 
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+### Prerequisites
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+Ensure you have the following installed on your machine:
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
+- Node.js (v14 or higher)
+- npm or yarn
 
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+### Installation
+
+1. **Clone the repository:**
+
+   ```bash
+   git clone https://github.com/yourusername/gemini-clone.git
+   cd gemini-clone
