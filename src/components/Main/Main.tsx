@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { assets } from "../../assets/assets";
 import { Context } from "../../context/context";
-import { grid } from 'ldrs'
+import { grid } from "ldrs";
 
 // Register the grid loader
 grid.register();
@@ -105,7 +105,10 @@ const SuggestionGrid: React.FC = () => (
   </div>
 );
 
-const SuggestionCard: React.FC<{ text: string; icon: string }> = ({ text, icon }) => (
+const SuggestionCard: React.FC<{ text: string; icon: string }> = ({
+  text,
+  icon,
+}) => (
   <div className="h-[200px] p-4 bg-[#f0f4f9] rounded-xl relative cursor-pointer hover:bg-[#dfe4ea]">
     <p className="text-[#585858] text-md">{text}</p>
     <img
@@ -140,7 +143,11 @@ const GeminiResponse: React.FC<{ loading: boolean; resultData: string }> = ({
   resultData,
 }) => (
   <div className="mx-10 my-0 flex items-start gap-5">
-    <img className="rounded-[50px] w-10" src={assets.gemini_icon} alt="Gemini" />
+    <img
+      className="rounded-[50px] w-10"
+      src={assets.gemini_icon}
+      alt="Gemini"
+    />
     {loading ? (
       <div className="w-full flex-col gap-5">
         <l-grid size="100" speed="2.8" color="#61ABFF"></l-grid>
@@ -162,34 +169,42 @@ const Footer: React.FC<{
   handleKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   extended: boolean;
 }> = ({ input, setInput, onSent, handleKeyDown, extended }) => (
-  <footer className={`fixed bottom-0 ${extended ? 'left-64' : 'left-16'} right-0 transition-all duration-300 ease-in-out`}>
-  <div className="max-w-[900px] mx-auto px-4 py-3">
-    <div className="flex items-center justify-between gap-4 bg-[#f0f4f9] px-2.5 py-2 rounded-[50px]">
-      <input
-        onChange={(e) => setInput(e.target.value)}
-        value={input}
-        className="flex-1 bg-transparent border-none outline-none p-2 text-md"
-        type="text"
-        placeholder="Enter a prompt here ..."
-        onKeyDown={handleKeyDown}
-      />
-      <div className="flex items-center gap-3">
-        <img className="w-5 cursor-pointer" src={assets.gallery_icon} alt="Gallery" />
-        <img className="w-5 cursor-pointer" src={assets.mic_icon} alt="Mic" />
-        <img
-          className="w-5 cursor-pointer"
-          src={assets.send_icon}
-          alt="Send"
-          onClick={() => onSent(input)}
+  <footer
+    className={`fixed bottom-0 ${
+      extended ? "left-64" : "left-16"
+    } right-0 transition-all duration-300 ease-in-out backdrop-blur-md bg-opacity-80`}
+  >
+    <div className="max-w-[900px] mx-auto px-4 py-3">
+      <div className="flex items-center justify-between gap-4 bg-[#f0f4f9] bg-opacity-90 backdrop-blur-lg px-2.5 py-2 rounded-[50px]">
+        <input
+          onChange={(e) => setInput(e.target.value)}
+          value={input}
+          className="flex-1 bg-transparent border-none outline-none p-2 text-md"
+          type="text"
+          placeholder="Enter a prompt here ..."
+          onKeyDown={handleKeyDown}
         />
+        <div className="flex items-center gap-3">
+          <img
+            className="w-5 cursor-pointer"
+            src={assets.gallery_icon}
+            alt="Gallery"
+          />
+          <img className="w-5 cursor-pointer" src={assets.mic_icon} alt="Mic" />
+          <img
+            className="w-5 cursor-pointer"
+            src={assets.send_icon}
+            alt="Send"
+            onClick={() => onSent(input)}
+          />
+        </div>
       </div>
+      <p className="text-sm mx-3 my-auto p-1 items-center text-center">
+        Gemini may display inaccurate info, including about people, so
+        double-check its responses. Your privacy and Gemini Apps.
+      </p>
     </div>
-    <p className="text-sm mx-3 my-auto p-1 items-center text-center">
-      Gemini may display inaccurate info, including about people, so
-      double-check its responses. Your privacy and Gemini Apps.
-    </p>
-  </div>
-</footer>
+  </footer>
 );
 
 export default Main;

@@ -16,14 +16,16 @@ interface ContextType {
   resultData?: string;
   setresultData: React.Dispatch<React.SetStateAction<string | undefined>>;
   onSent: (prompt: string) => Promise<void>;
-  extended: boolean,
+  extended: boolean;
   setExtended: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 // Create the context with a default undefined value
 export const Context = createContext<ContextType | undefined>(undefined);
 
-export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [input, setInput] = useState<string>();
   const [recentPrompt, setrecentPrompt] = useState<string>();
   const [previousPrompt, setpreviousPrompt] = useState<string[]>();
@@ -32,33 +34,36 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [resultData, setresultData] = useState<string>();
   const [extended, setExtended] = useState<boolean>(false);
 
-  const delayPara = (index: number, nextWord: string) =>{
+  const delayPara = (index: number, nextWord: string) => {
     setTimeout(function () {
-        setresultData(prev => prev+nextWord)
-    }, 75*index)
-  }
+      setresultData((prev) => prev + nextWord);
+    }, 75 * index);
+  };
   const onSent = async (prompt: string) => {
     setresultData("");
     setLoading(true);
     setshowResult(true);
-    setrecentPrompt(prompt)
+    setrecentPrompt(prompt);
+    setpreviousPrompt((prev: any) => {
+      if (!prev) prev = [];
+      return [...prev, input];
+    });
+
     try {
       const response = await run(prompt); // Make sure 'run' is properly defined in your gemini config
       let responseArray = response.split("**");
-      let newResponse: any = [];
-      for(let i=0; i< responseArray.length; i++){
-        if(i==0 || i%2!==1 ){
-            newResponse += responseArray[i]
+      let newResponse: any = "";
+      for (let i = 0; i < responseArray.length; i++) {
+        if (i == 0 || i % 2 !== 1) {
+          newResponse += responseArray[i];
+        } else {
+          newResponse += "<b>" + responseArray[i] + "</b>";
         }
-        else{
-            newResponse += "<b>" + responseArray[i] + "</b>";
-        }
-
       }
-      let newResponse2 = newResponse.split("*").join("<br/>")
+      let newResponse2 = newResponse.split("*").join("<br/>");
       let newResponseArray = newResponse2.split(" ");
-      for(let i=0; i<newResponseArray.length; i++){
-        delayPara(i, newResponseArray[i]+" ")
+      for (let i = 0; i < newResponseArray.length; i++) {
+        delayPara(i, newResponseArray[i] + " ");
       }
       setresultData(newResponse2);
       setLoading(false);
@@ -89,9 +94,5 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setExtended,
   };
 
-  return (
-    <Context.Provider value={contextValue}>
-      {children}
-    </Context.Provider>
-  );
+  return <Context.Provider value={contextValue}>{children}</Context.Provider>;
 };

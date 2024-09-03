@@ -12,10 +12,7 @@ Welcome to the **Gemini Clone** repository! This project is a full-stack impleme
 
 ## Tech Stack 🛠️
 
-- **Frontend:** Next.js, React
-- **Backend:** Node.js, Express (or any chosen backend)
-- **Real-Time Communication:** WebSocket
-- **State Management:** TanStack React Query
+- **Frontend:** React
 - **Styling:** Tailwind CSS or Styled Components
 
 ## Setup & Installation 🛠️
@@ -34,3 +31,4 @@ Ensure you have the following installed on your machine:
    ```bash
    git clone https://github.com/yourusername/gemini-clone.git
    cd gemini-clone
+   ```
