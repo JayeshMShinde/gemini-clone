@@ -1,6 +1,6 @@
 # Gemini Clone 🌟
 
-Welcome to the **Gemini Clone** repository! This project is a full-stack implementation of a chat application inspired by Gemini, featuring real-time AI conversations, dynamic chat history, and a user-friendly interface. The application is built using **Next.js** for the front end and leverages **WebSockets** for real-time communication with an AI model.
+Welcome to the **Gemini Clone** repository! This project is a full-stack implementation of a chat application inspired by Gemini, featuring real-time AI conversations, dynamic chat history, and a user-friendly interface. The application is built using **React.js** for the front end.
 
 ## Features 🚀
 
