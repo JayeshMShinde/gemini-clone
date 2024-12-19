@@ -60,7 +60,8 @@ const Main: React.FC = () => {
 // Header component
 const Header: React.FC = () => (
   <header className="flex items-center justify-between p-5 text-md text-[#585858]">
-    <p>Gemini</p>
+    <p>Gemini-Clone by JS
+    </p>
     <img className="w-10 rounded-full" src={assets.user_icon} alt="User" />
   </header>
 );
