@@ -60,7 +60,7 @@ const Main: React.FC = () => {
 // Header component
 const Header: React.FC = () => (
   <header className="flex items-center justify-between p-5 text-md text-[#585858]">
-    <p>Gemini-Clone ~ Jayesh Shinde
+    <p>Gemini-Clone by Jayesh Shinde
     </p>
     <img className="w-10 rounded-full" src={assets.user_icon} alt="User" />
   </header>
@@ -78,7 +78,7 @@ const WelcomeMessage: React.FC = () => (
   <div className="mt-12 mb-12 text-6xl text-[#c4c7c5] font-semibold p-2">
     <p>
       <span className="bg-clip-text bg-gradient-to-r from-[#4b90ff] to-[#ff5546] text-transparent">
-        Hello, DEV 
+        Hello, Dev.
       </span>
     </p>
     <p>How can I help you today?</p>
