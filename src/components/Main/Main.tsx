@@ -78,7 +78,7 @@ const WelcomeMessage: React.FC = () => (
   <div className="mt-12 mb-12 text-6xl text-[#c4c7c5] font-semibold p-2">
     <p>
       <span className="bg-clip-text bg-gradient-to-r from-[#4b90ff] to-[#ff5546] text-transparent">
-        Hello, Dev.
+        Hello, Suraj kamble
       </span>
     </p>
     <p>How can I help you today?</p>
