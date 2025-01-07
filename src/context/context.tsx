@@ -35,19 +35,22 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const delayPara = useCallback((text: string) => {
     setAnimationInProgress(true);
+    setresultData('');
     const words = text.split(" ");
     let currentIndex = 0;
-
+    let currentText = '';
+  
     const animateWord = () => {
       if (currentIndex < words.length) {
-        setresultData(prev => (prev || "") + words[currentIndex] + " ");
+        currentText += words[currentIndex] + " ";
+        setresultData(currentText);
         currentIndex++;
         setTimeout(animateWord, 75);
       } else {
         setAnimationInProgress(false);
       }
     };
-
+  
     animateWord();
   }, []);
 
