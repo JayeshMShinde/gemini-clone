@@ -21,7 +21,9 @@ interface ContextType {
 
 export const Context = createContext<ContextType | undefined>(undefined);
 
-export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [input, setInput] = useState<string>();
   const [recentPrompt, setrecentPrompt] = useState<string>();
   const [previousPrompt, setpreviousPrompt] = useState<string[]>();

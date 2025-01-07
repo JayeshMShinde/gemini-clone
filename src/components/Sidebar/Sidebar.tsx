@@ -3,25 +3,28 @@ import { assets } from "../../assets/assets";
 import { Context } from "../../context/context";
 
 const Sidebar = () => {
-
   const context = useContext(Context);
 
   if (!context) {
     return <div>Error: Context not available</div>;
   }
-  
-  const {extended, setExtended } = context;
-  
+
+  const { extended, setExtended, previousPrompt } = context;
+
   return (
-    <div className={`min-h-screen inline-flex flex-col justify-between bg-[#f0f4f9] p-6 transition-all ease-in-out duration-300 ${
-      extended ? "w-64" : "w-24"
-    }`}>
+    <div
+      className={`min-h-screen inline-flex flex-col justify-between bg-[#f0f4f9] p-6 transition-all ease-in-out duration-300 ${
+        extended ? "w-64" : "w-24"
+      }`}
+    >
       <div className="">
         <img
           className="w-5 h-5 block ml-2.5 cursor-pointer"
           src={assets.menu_icon}
           alt=""
-          onClick={()=>{setExtended((prev: boolean)=>!prev)}}
+          onClick={() => {
+            setExtended((prev: boolean) => !prev);
+          }}
         />
         <div className="mt-12 p-2 inline-flex items-center gap-2.5 px-2 py-2 bg-[#e6eaf1] rounded-[50px] text-sm text-gray-400 cursor-pointer">
           {/* // new Chat */}
@@ -35,10 +38,17 @@ const Sidebar = () => {
               {/* recent title */}
               Recent
             </p>
-            <div className="flex items-start gap-2.5 p-2.5 pr-10 rounded-[50px] text-[#282828] cursor-pointer hover:bg-[#e2e6eb]">
-              <img className="w-5" src={assets.message_icon} alt="" />
-              <p>What is react ...</p>
-            </div>
+            {previousPrompt?.map((item, index) => {
+              return (
+                <div
+                  key={index}
+                  className="flex items-start gap-2.5 p-2.5 pr-10 rounded-[50px] text-[#282828] cursor-pointer hover:bg-[#e2e6eb]"
+                >
+                  <img className="w-5" src={assets.message_icon} alt="" />
+                  <p>{item.slice(0, 18)} ...</p>
+                </div>
+              );
+            })}
           </div>
         ) : null}
       </div>
@@ -46,17 +56,17 @@ const Sidebar = () => {
         <div className="flex items-center gap-2.5 p-2.5 pr-2.5 rounded-[50px] text-[#282828] cursor-pointer hover:bg-[#e2e6eb]">
           {/* bottom */}
           <img className="w-5 h-5" src={assets.question_icon} alt="" />
-          {extended ? <p>Help</p> : null }
+          {extended ? <p>Help</p> : null}
         </div>
         <div className="flex items-center gap-2.5 p-2.5 pr-2.5 rounded-[50px] text-[#282828] cursor-pointer hover:bg-[#e2e6eb]">
           {/* bottom */}
           <img className="w-5 h-5" src={assets.history_icon} alt="" />
-          { extended ? <p>Activity</p> : null }
+          {extended ? <p>Activity</p> : null}
         </div>
         <div className="flex items-center gap-2.5 p-2.5 pr-2.5 rounded-[50px] text-[#282828] cursor-pointer hover:bg-[#e2e6eb]">
           {/* bottom */}
           <img className="w-5 h-5 " src={assets.setting_icon} alt="" />
-          {extended ? <p>Settings</p> : null }
+          {extended ? <p>Settings</p> : null}
         </div>
       </div>
     </div>

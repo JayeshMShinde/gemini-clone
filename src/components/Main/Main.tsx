@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { assets } from "../../assets/assets";
 import { Context } from "../../context/context";
-import { grid } from 'ldrs'
+import { grid } from "ldrs";
 
 grid.register();
 
@@ -103,7 +103,10 @@ const SuggestionGrid: React.FC = () => (
   </div>
 );
 
-const SuggestionCard: React.FC<{ text: string; icon: string }> = ({ text, icon }) => (
+const SuggestionCard: React.FC<{ text: string; icon: string }> = ({
+  text,
+  icon,
+}) => (
   <div className="h-[200px] p-4 bg-[#f0f4f9] rounded-xl relative cursor-pointer hover:bg-[#dfe4ea]">
     <p className="text-[#585858] text-md">{text}</p>
     <img
