@@ -3,10 +3,8 @@ import { assets } from "../../assets/assets";
 import { Context } from "../../context/context";
 import { grid } from 'ldrs'
 
-// Register the grid loader
 grid.register();
 
-// Main component
 const Main: React.FC = () => {
   const context = useContext(Context);
 
@@ -33,18 +31,20 @@ const Main: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 min-h-screen relative pb-[15vh]">
+    <div className="flex flex-col h-screen">
       <Header />
-      <main className="max-w-[900px] m-auto">
-        {!showResult ? (
-          <InitialView />
-        ) : (
-          <ResultView
-            recentPrompt={recentPrompt as string}
-            loading={loading}
-            resultData={resultData as string}
-          />
-        )}
+      <main className="flex-1 overflow-y-auto">
+        <div className="max-w-[1900px] mx-auto px-40 py-5">
+          {!showResult ? (
+            <InitialView />
+          ) : (
+            <ResultView
+              recentPrompt={recentPrompt as string}
+              loading={loading}
+              resultData={resultData as string}
+            />
+          )}
+        </div>
       </main>
       <Footer
         input={input as string}
@@ -57,20 +57,18 @@ const Main: React.FC = () => {
   );
 };
 
-// Header component
 const Header: React.FC = () => (
-  <header className="flex items-center justify-between p-5 text-md text-[#585858]">
+<header className="flex items-center justify-between p-5 text-md text-[#585858]">
     <p>Gemini</p>
     <img className="w-10 rounded-full" src={assets.user_icon} alt="User" />
   </header>
 );
 
-// Initial view components
 const InitialView: React.FC = () => (
-  <>
+  <div className="py-12">
     <WelcomeMessage />
     <SuggestionGrid />
-  </>
+  </div>
 );
 
 const WelcomeMessage: React.FC = () => (
@@ -116,22 +114,23 @@ const SuggestionCard: React.FC<{ text: string; icon: string }> = ({ text, icon }
   </div>
 );
 
-// Result view components
+// Other components remain the same until ResultView
+
 const ResultView: React.FC<{
   recentPrompt: string;
   loading: boolean;
   resultData: string;
 }> = ({ recentPrompt, loading, resultData }) => (
-  <div className="px-0 py-[5%] min-h-[70vh] overflow-y-hidden">
+  <div className="py-8 min-h-[calc(100vh-200px)]">
     <UserPrompt prompt={recentPrompt} />
     <GeminiResponse loading={loading} resultData={resultData} />
   </div>
 );
 
 const UserPrompt: React.FC<{ prompt: string }> = ({ prompt }) => (
-  <div className="mx-10 my-0 flex items-start gap-5 mb-10">
-    <img className="rounded-[50px] w-10" src={assets.user_icon} alt="User" />
-    <p>{prompt}</p>
+  <div className="flex items-start gap-5 mb-8">
+    <img className="w-10 rounded-full flex-shrink-0" src={assets.user_icon} alt="User" />
+    <p className="flex-1">{prompt}</p>
   </div>
 );
 
@@ -139,22 +138,21 @@ const GeminiResponse: React.FC<{ loading: boolean; resultData: string }> = ({
   loading,
   resultData,
 }) => (
-  <div className="mx-10 my-0 flex items-start gap-5">
-    <img className="rounded-[50px] w-10" src={assets.gemini_icon} alt="Gemini" />
+  <div className="flex items-start gap-5">
+    <img className="w-10 rounded-full flex-shrink-0" src={assets.gemini_icon} alt="Gemini" />
     {loading ? (
-      <div className="w-full flex-col gap-5">
+      <div className="flex-1">
         <l-grid size="100" speed="2.8" color="#61ABFF"></l-grid>
       </div>
     ) : (
       <p
-        className="text-md leading-7"
+        className="flex-1 leading-7"
         dangerouslySetInnerHTML={{ __html: resultData }}
       ></p>
     )}
   </div>
 );
 
-// Footer component
 const Footer: React.FC<{
   input: string;
   setInput: (value: string) => void;
@@ -162,34 +160,34 @@ const Footer: React.FC<{
   handleKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   extended: boolean;
 }> = ({ input, setInput, onSent, handleKeyDown, extended }) => (
-  <footer className={`fixed bottom-0 ${extended ? 'left-64' : 'left-16'} right-0 transition-all duration-300 ease-in-out`}>
-  <div className="max-w-[900px] mx-auto px-4 py-3">
-    <div className="flex items-center justify-between gap-4 bg-[#f0f4f9] px-2.5 py-2 rounded-[50px]">
-      <input
-        onChange={(e) => setInput(e.target.value)}
-        value={input}
-        className="flex-1 bg-transparent border-none outline-none p-2 text-md"
-        type="text"
-        placeholder="Enter a prompt here ..."
-        onKeyDown={handleKeyDown}
-      />
-      <div className="flex items-center gap-3">
-        <img className="w-5 cursor-pointer" src={assets.gallery_icon} alt="Gallery" />
-        <img className="w-5 cursor-pointer" src={assets.mic_icon} alt="Mic" />
-        <img
-          className="w-5 cursor-pointer"
-          src={assets.send_icon}
-          alt="Send"
-          onClick={() => onSent(input)}
+  <footer className={`sticky bottom-0 bg-white border-t ${extended ? 'ml-64' : 'ml-16'} transition-all duration-300`}>
+    <div className="max-w-[900px] mx-auto px-4 py-4">
+      <div className="flex items-center gap-4 bg-[#f0f4f9] px-4 py-2 rounded-full">
+        <input
+          onChange={(e) => setInput(e.target.value)}
+          value={input}
+          className="flex-1 bg-transparent border-none outline-none"
+          type="text"
+          placeholder="Enter a prompt here ..."
+          onKeyDown={handleKeyDown}
         />
+        <div className="flex items-center gap-4">
+          <img className="w-5 cursor-pointer" src={assets.gallery_icon} alt="Gallery" />
+          <img className="w-5 cursor-pointer" src={assets.mic_icon} alt="Mic" />
+          <img
+            className="w-5 cursor-pointer"
+            src={assets.send_icon}
+            alt="Send"
+            onClick={() => onSent(input)}
+          />
+        </div>
       </div>
+      <p className="text-sm text-center mt-2 text-gray-600">
+        Gemini may display inaccurate info, including about people, so
+        double-check its responses. Your privacy and Gemini Apps.
+      </p>
     </div>
-    <p className="text-sm mx-3 my-auto p-1 items-center text-center">
-      Gemini may display inaccurate info, including about people, so
-      double-check its responses. Your privacy and Gemini Apps.
-    </p>
-  </div>
-</footer>
+  </footer>
 );
 
 export default Main;

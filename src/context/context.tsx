@@ -1,7 +1,6 @@
-import React, { createContext, useState } from "react";
-import run from "../config/gemini"; // Adjust the import based on your file structure
+import React, { createContext, useState, useCallback } from "react";
+import run from "../config/gemini";
 
-// Define the type for the context
 interface ContextType {
   input?: string;
   setInput: React.Dispatch<React.SetStateAction<string | undefined>>;
@@ -16,11 +15,10 @@ interface ContextType {
   resultData?: string;
   setresultData: React.Dispatch<React.SetStateAction<string | undefined>>;
   onSent: (prompt: string) => Promise<void>;
-  extended: boolean,
+  extended: boolean;
   setExtended: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-// Create the context with a default undefined value
 export const Context = createContext<ContextType | undefined>(undefined);
 
 export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -31,41 +29,47 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [loading, setLoading] = useState<boolean>(false);
   const [resultData, setresultData] = useState<string>();
   const [extended, setExtended] = useState<boolean>(false);
+  const [animationInProgress, setAnimationInProgress] = useState<boolean>(false);
 
-  const delayPara = (index: number, nextWord: string) =>{
-    setTimeout(function () {
-        setresultData(prev => prev+nextWord)
-    }, 75*index)
-  }
+  const delayPara = useCallback((text: string) => {
+    setAnimationInProgress(true);
+    const words = text.split(" ");
+    let currentIndex = 0;
+
+    const animateWord = () => {
+      if (currentIndex < words.length) {
+        setresultData(prev => (prev || "") + words[currentIndex] + " ");
+        currentIndex++;
+        setTimeout(animateWord, 75);
+      } else {
+        setAnimationInProgress(false);
+      }
+    };
+
+    animateWord();
+  }, []);
+
   const onSent = async (prompt: string) => {
+    if (animationInProgress) return;
+    
     setresultData("");
     setLoading(true);
     setshowResult(true);
-    setrecentPrompt(prompt)
-    try {
-      const response = await run(prompt); // Make sure 'run' is properly defined in your gemini config
-      let responseArray = response.split("**");
-      let newResponse: any = [];
-      for(let i=0; i< responseArray.length; i++){
-        if(i==0 || i%2!==1 ){
-            newResponse += responseArray[i]
-        }
-        else{
-            newResponse += "<b>" + responseArray[i] + "</b>";
-        }
+    setrecentPrompt(prompt);
 
-      }
-      let newResponse2 = newResponse.split("*").join("<br/>")
-      let newResponseArray = newResponse2.split(" ");
-      for(let i=0; i<newResponseArray.length; i++){
-        delayPara(i, newResponseArray[i]+" ")
-      }
-      setresultData(newResponse2);
-      setLoading(false);
+    try {
+      const response = await run(prompt);
+      
+      const formattedText = response.split("**").reduce((acc, curr, i) => 
+        i % 2 === 1 ? acc + `<b>${curr}</b>` : acc + curr
+      , "");
+      
+      const withLineBreaks = formattedText.split("*").join("<br/>");
+      delayPara(withLineBreaks);
       setInput("");
     } catch (error) {
-      console.error("Error fetching response:", error);
-      setresultData("There was an error processing your request.");
+      console.error("Error:", error);
+      setresultData("Error processing request.");
     } finally {
       setLoading(false);
     }
