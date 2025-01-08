@@ -21,9 +21,7 @@ interface ContextType {
 
 export const Context = createContext<ContextType | undefined>(undefined);
 
-export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [input, setInput] = useState<string>();
   const [recentPrompt, setrecentPrompt] = useState<string>();
   const [previousPrompt, setpreviousPrompt] = useState<string[]>();
@@ -33,24 +31,37 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
   const [extended, setExtended] = useState<boolean>(false);
   const [animationInProgress, setAnimationInProgress] = useState<boolean>(false);
 
+  const formatCodeBlocks = (text: string) => {
+    // Handle triple quotes (both single and double)
+    const tripleDoubleQuoteRegex = /"""([\s\S]*?)"""/g;
+    const tripleSingleQuoteRegex = /'''([\s\S]*?)'''/g;
+
+    let formattedText = text.replace(tripleDoubleQuoteRegex, (match, code) => {
+      return `<pre class="code-block"><code>${code}</code></pre>`;
+    });
+
+    formattedText = formattedText.replace(tripleSingleQuoteRegex, (match, code) => {
+      return `<pre class="code-block"><code>${code}</code></pre>`;
+    });
+
+    return formattedText;
+  };
+
   const delayPara = useCallback((text: string) => {
     setAnimationInProgress(true);
-    setresultData('');
     const words = text.split(" ");
     let currentIndex = 0;
-    let currentText = '';
-  
+
     const animateWord = () => {
       if (currentIndex < words.length) {
-        currentText += words[currentIndex] + " ";
-        setresultData(currentText);
+        setresultData(prev => (prev || "") + words[currentIndex] + " ");
         currentIndex++;
         setTimeout(animateWord, 75);
       } else {
         setAnimationInProgress(false);
       }
     };
-  
+
     animateWord();
   }, []);
 
@@ -65,11 +76,17 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       const response = await run(prompt);
       
-      const formattedText = response.split("**").reduce((acc, curr, i) => 
+      // First handle code blocks
+      const withCodeBlocks = formatCodeBlocks(response);
+      
+      // Then handle bold text
+      const formattedText = withCodeBlocks.split("**").reduce((acc, curr, i) => 
         i % 2 === 1 ? acc + `<b>${curr}</b>` : acc + curr
       , "");
       
+      // Finally handle line breaks
       const withLineBreaks = formattedText.split("*").join("<br/>");
+      
       delayPara(withLineBreaks);
       setInput("");
     } catch (error) {
