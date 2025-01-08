@@ -35,7 +35,7 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({ child
     // Split text into parts using code block markers
     const parts = text.split(/(```[\s\S]*?```)/g);
     
-    return parts.map((part, index) => {
+    return parts.map((part, _) => {
       if (part.startsWith('```') && part.endsWith('```')) {
         // Extract language if specified
         const firstLineEnd = part.indexOf('\n');
