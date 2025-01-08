@@ -31,38 +31,60 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [extended, setExtended] = useState<boolean>(false);
   const [animationInProgress, setAnimationInProgress] = useState<boolean>(false);
 
-  const formatCodeBlocks = (text: string) => {
-    // Handle triple quotes (both single and double)
-    const tripleDoubleQuoteRegex = /"""([\s\S]*?)"""/g;
-    const tripleSingleQuoteRegex = /'''([\s\S]*?)'''/g;
-
-    let formattedText = text.replace(tripleDoubleQuoteRegex, (match, code) => {
-      return `<pre class="code-block"><code>${code}</code></pre>`;
-    });
-
-    formattedText = formattedText.replace(tripleSingleQuoteRegex, (match, code) => {
-      return `<pre class="code-block"><code>${code}</code></pre>`;
-    });
-
-    return formattedText;
+  const formatMarkdownCodeBlocks = (text: string) => {
+    // Split text into parts using code block markers
+    const parts = text.split(/(```[\s\S]*?```)/g);
+    
+    return parts.map((part, index) => {
+      if (part.startsWith('```') && part.endsWith('```')) {
+        // Extract language if specified
+        const firstLineEnd = part.indexOf('\n');
+        const firstLine = part.slice(3, firstLineEnd).trim();
+        const code = part.slice(firstLineEnd + 1, -3).trim();
+        
+        return `<pre class="code-block ${firstLine}"><code>${code}</code></pre>`;
+      }
+      return part;
+    }).join('');
   };
 
   const delayPara = useCallback((text: string) => {
     setAnimationInProgress(true);
-    const words = text.split(" ");
+    // Split by HTML tags to preserve them during animation
+    const parts = text.split(/(<.*?>)/g);
     let currentIndex = 0;
+    let buffer = '';
 
-    const animateWord = () => {
-      if (currentIndex < words.length) {
-        setresultData(prev => (prev || "") + words[currentIndex] + " ");
-        currentIndex++;
-        setTimeout(animateWord, 75);
+    const animatePart = () => {
+      if (currentIndex < parts.length) {
+        const part = parts[currentIndex];
+        
+        if (part.startsWith('<') && part.endsWith('>')) {
+          // If it's an HTML tag, add it directly
+          buffer += part;
+        } else {
+          // If it's text content, animate word by word
+          const words = part.split(' ');
+          const word = words[0];
+          if (word) {
+            buffer += word + ' ';
+            parts[currentIndex] = words.slice(1).join(' ');
+            if (parts[currentIndex].length === 0) {
+              currentIndex++;
+            }
+          } else {
+            currentIndex++;
+          }
+        }
+        
+        setresultData(buffer);
+        setTimeout(animatePart, 75);
       } else {
         setAnimationInProgress(false);
       }
     };
 
-    animateWord();
+    animatePart();
   }, []);
 
   const onSent = async (prompt: string) => {
@@ -76,16 +98,17 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({ child
     try {
       const response = await run(prompt);
       
-      // First handle code blocks
-      const withCodeBlocks = formatCodeBlocks(response);
+      // Process the response in order:
+      // 1. Handle code blocks
+      const withCodeBlocks = formatMarkdownCodeBlocks(response);
       
-      // Then handle bold text
-      const formattedText = withCodeBlocks.split("**").reduce((acc, curr, i) => 
+      // 2. Handle bold text
+      const withBoldText = withCodeBlocks.split("**").reduce((acc, curr, i) => 
         i % 2 === 1 ? acc + `<b>${curr}</b>` : acc + curr
       , "");
       
-      // Finally handle line breaks
-      const withLineBreaks = formattedText.split("*").join("<br/>");
+      // 3. Handle line breaks
+      const withLineBreaks = withBoldText.split("*").join("<br/>");
       
       delayPara(withLineBreaks);
       setInput("");
