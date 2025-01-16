@@ -6,6 +6,7 @@ const App = () => {
     <>
       <Sidebar />
       <Main />
+      {/* </Sidebar> */}
     </>
   )
 }

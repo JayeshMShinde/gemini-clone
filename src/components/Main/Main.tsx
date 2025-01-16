@@ -5,11 +5,48 @@ import { grid } from "ldrs";
 
 grid.register();
 
+// Types
+interface ContextType {
+  onSent: (value: string) => void;
+  recentPrompt?: string;
+  showResult: boolean;
+  loading: boolean;
+  resultData?: string;
+  setInput: (value: string) => void;
+  input?: string;
+  extended: boolean;
+}
+
+interface SuggestionCardProps {
+  text: string;
+  icon: string;
+  onClick?: () => void;
+}
+
+interface ResultViewProps {
+  recentPrompt: string;
+  loading: boolean;
+  resultData: string;
+}
+
+interface FooterProps {
+  input: string;
+  setInput: (value: string) => void;
+  onSent: (value: string) => void;
+  handleKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  extended: boolean;
+}
+
+// Main Component
 const Main: React.FC = () => {
-  const context = useContext(Context);
+  const context = useContext<ContextType | null>(Context as any);
 
   if (!context) {
-    return <div>Error: Context not available</div>;
+    return (
+      <div className="flex items-center justify-center h-screen text-red-500 bg-red-50">
+        Error: Context not available
+      </div>
+    );
   }
 
   const {
@@ -23,31 +60,37 @@ const Main: React.FC = () => {
     extended,
   } = context;
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>): void => {
+    if (e.key === "Enter" && input?.trim()) {
       e.preventDefault();
-      onSent(input as string);
+      onSent(input);
     }
   };
 
   return (
-    <div className="flex flex-col h-screen">
+    <div 
+      className={`
+        flex flex-col min-h-screen bg-white
+        ${extended ? 'ml-64' : 'ml-20'}
+        transition-all duration-300
+      `}
+    >
       <Header />
       <main className="flex-1 overflow-y-auto">
-        <div className="max-w-[1900px] mx-auto px-40 py-5">
+        <div className="max-w-[1900px] mx-auto px-6 md:px-20 lg:px-40 py-5">
           {!showResult ? (
             <InitialView />
           ) : (
             <ResultView
-              recentPrompt={recentPrompt as string}
+              recentPrompt={recentPrompt || ""}
               loading={loading}
-              resultData={resultData as string}
+              resultData={resultData || ""}
             />
           )}
         </div>
       </main>
       <Footer
-        input={input as string}
+        input={input || ""}
         setInput={setInput}
         onSent={onSent}
         handleKeyDown={handleKeyDown}
@@ -56,84 +99,75 @@ const Main: React.FC = () => {
     </div>
   );
 };
-
+// Header Component
 const Header: React.FC = () => (
-<header className="flex items-center justify-between p-5 text-md text-[#585858]">
-    <p>Gemini</p>
-    <img className="w-10 rounded-full" src={assets.user_icon} alt="User" />
+  <header className="sticky top-0 right-0 bg-white/80 backdrop-blur-sm border-b shadow-sm z-10">
+    <div className="max-w-[1900px] mx-auto px-6 py-4 flex items-center justify-between">
+      <div className="flex items-center gap-2">
+        <span className="text-lg font-semibold text-gray-700">Gemini</span>
+      </div>
+      <img
+        className="w-10 h-10 rounded-full shadow-sm cursor-pointer hover:opacity-90 transition-opacity"
+        src={assets.user_icon}
+        alt="User Profile"
+      />
+    </div>
   </header>
 );
-
+// Initial View Components
 const InitialView: React.FC = () => (
-  <div className="py-12">
+  <div className="py-12 max-w-6xl mx-auto">
     <WelcomeMessage />
     <SuggestionGrid />
   </div>
 );
 
 const WelcomeMessage: React.FC = () => (
-  <div className="mt-12 mb-12 text-6xl text-[#c4c7c5] font-semibold p-2">
-    <p>
-      <span className="bg-clip-text bg-gradient-to-r from-[#4b90ff] to-[#ff5546] text-transparent">
+  <div className="mb-16 text-center">
+    <h1 className="text-5xl md:text-6xl font-bold text-gray-700 mb-4">
+      <span className="bg-gradient-to-r from-blue-500 to-red-500 bg-clip-text text-transparent">
         Hello, Dev.
       </span>
+    </h1>
+    <p className="text-4xl md:text-5xl font-semibold text-gray-500">
+      How can I help you today?
     </p>
-    <p>How can I help you today?</p>
   </div>
 );
 
 const SuggestionGrid: React.FC = () => (
-  <div className="grid grid-cols-4 gap-3 p-2">
-    <SuggestionCard
-      text="Show me how to build something by hand"
-      icon={assets.compass_icon}
-    />
-    <SuggestionCard
-      text="Give me tips to help care for a tricky plant"
-      icon={assets.bulb_icon}
-    />
-    <SuggestionCard
-      text="Come up with a product name for a new app"
-      icon={assets.message_icon}
-    />
-    <SuggestionCard
-      text="Explain how something works like an engineer"
-      icon={assets.code_icon}
-    />
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-2">
+    {suggestions.map((suggestion, index) => (
+      <SuggestionCard key={index} {...suggestion} />
+    ))}
   </div>
 );
 
-const SuggestionCard: React.FC<{ text: string; icon: string }> = ({
-  text,
-  icon,
-}) => (
-  <div className="h-[200px] p-4 bg-[#f0f4f9] rounded-xl relative cursor-pointer hover:bg-[#dfe4ea]">
-    <p className="text-[#585858] text-md">{text}</p>
-    <img
-      className="w-9 p-1.5 absolute bg-white rounded-[20px] bottom-2.5 right-2.5"
-      src={icon}
-      alt=""
-    />
+const SuggestionCard: React.FC<SuggestionCardProps> = ({ text, icon }) => (
+  <div className="group h-[200px] p-6 bg-gray-50 rounded-2xl relative cursor-pointer hover:bg-gray-100 transition-all duration-300 shadow-sm hover:shadow-md">
+    <p className="text-gray-700 text-lg font-medium leading-relaxed">{text}</p>
+    <div className="absolute bottom-4 right-4 bg-white p-2 rounded-xl shadow-sm group-hover:shadow-md transition-all">
+      <img className="w-8 h-8" src={icon} alt="" />
+    </div>
   </div>
 );
 
-// Other components remain the same until ResultView
-
-const ResultView: React.FC<{
-  recentPrompt: string;
-  loading: boolean;
-  resultData: string;
-}> = ({ recentPrompt, loading, resultData }) => (
-  <div className="py-8 min-h-[calc(100vh-200px)]">
+// Result View Components
+const ResultView: React.FC<ResultViewProps> = ({ recentPrompt, loading, resultData }) => (
+  <div className="py-8 min-h-[calc(100vh-200px)] max-w-screen mx-auto">
     <UserPrompt prompt={recentPrompt} />
     <GeminiResponse loading={loading} resultData={resultData} />
   </div>
 );
 
 const UserPrompt: React.FC<{ prompt: string }> = ({ prompt }) => (
-  <div className="flex items-start gap-5 mb-8">
-    <img className="w-10 rounded-full flex-shrink-0" src={assets.user_icon} alt="User" />
-    <p className="flex-1">{prompt}</p>
+  <div className="flex items-start gap-5 mb-8 p-4 bg-gray-50 rounded-2xl">
+    <img
+      className="w-10 h-10 rounded-full shadow-sm"
+      src={assets.user_icon}
+      alt="User"
+    />
+    <p className="flex-1 text-gray-700 leading-relaxed pt-1">{prompt}</p>
   </div>
 );
 
@@ -141,56 +175,84 @@ const GeminiResponse: React.FC<{ loading: boolean; resultData: string }> = ({
   loading,
   resultData,
 }) => (
-  <div className="flex items-start gap-5">
-    <img className="w-10 rounded-full flex-shrink-0" src={assets.gemini_icon} alt="Gemini" />
+  <div className="flex items-start gap-5 p-4 bg-blue-50 rounded-2xl">
+    <img
+      className="w-10 h-10 rounded-full shadow-sm"
+      src={assets.gemini_icon}
+      alt="Gemini"
+    />
     {loading ? (
-      <div className="flex-1">
-        <l-grid size="100" speed="2.8" color="#61ABFF"></l-grid>
+      <div className="flex-1 flex justify-center py-8">
+        <l-grid size="100" speed="2.8" color="#61ABFF" />
       </div>
     ) : (
-      <p
-        className="flex-1 leading-7"
+      <div
+        className="flex-1 prose prose-blue max-w-none leading-relaxed pt-1"
         dangerouslySetInnerHTML={{ __html: resultData }}
-      ></p>
+      />
     )}
   </div>
 );
 
-const Footer: React.FC<{
-  input: string;
-  setInput: (value: string) => void;
-  onSent: (value: string) => void;
-  handleKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
-  extended: boolean;
-}> = ({ input, setInput, onSent, handleKeyDown, extended }) => (
-  <footer className={`sticky bottom-0 bg-white border-t ${extended ? 'ml-64' : 'ml-16'} transition-all duration-300`}>
-    <div className="max-w-[900px] mx-auto px-4 py-4">
-      <div className="flex items-center gap-4 bg-[#f0f4f9] px-4 py-2 rounded-full">
+// Footer Component
+const Footer: React.FC<FooterProps> = ({
+  input,
+  setInput,
+  onSent,
+  handleKeyDown,
+}) => (
+  <footer className="sticky bottom-0 right-0 bg-white border-t shadow-sm z-10">
+    <div className="max-w-3xl mx-auto px-4 py-4">
+      <div className="flex items-center gap-4 bg-gray-50 px-6 py-3 rounded-full shadow-sm">
         <input
           onChange={(e) => setInput(e.target.value)}
           value={input}
-          className="flex-1 bg-transparent border-none outline-none"
+          className="flex-1 bg-transparent border-none outline-none text-gray-700 placeholder-gray-400"
           type="text"
-          placeholder="Enter a prompt here ..."
+          placeholder="Enter a prompt here..."
           onKeyDown={handleKeyDown}
         />
-        <div className="flex items-center gap-4">
-          <img className="w-5 cursor-pointer" src={assets.gallery_icon} alt="Gallery" />
-          <img className="w-5 cursor-pointer" src={assets.mic_icon} alt="Mic" />
-          <img
-            className="w-5 cursor-pointer"
-            src={assets.send_icon}
-            alt="Send"
-            onClick={() => onSent(input)}
-          />
+        <div className="flex items-center gap-6">
+          <button className="hover:opacity-70 transition-opacity">
+            <img className="w-5 h-5" src={assets.gallery_icon} alt="Gallery" />
+          </button>
+          <button className="hover:opacity-70 transition-opacity">
+            <img className="w-5 h-5" src={assets.mic_icon} alt="Mic" />
+          </button>
+          <button
+            onClick={() => input.trim() && onSent(input)}
+            className="hover:opacity-70 transition-opacity"
+          >
+            <img className="w-5 h-5" src={assets.send_icon} alt="Send" />
+          </button>
         </div>
       </div>
-      <p className="text-sm text-center mt-2 text-gray-600">
-        Gemini may display inaccurate info, including about people, so
-        double-check its responses. Your privacy and Gemini Apps.
+      <p className="text-sm text-center mt-3 text-gray-500">
+        Gemini may display inaccurate info, including about people, so double-check
+        its responses. Your privacy and Gemini Apps.
       </p>
     </div>
   </footer>
 );
+
+// Suggestion data
+const suggestions = [
+  {
+    text: "Show me how to build something by hand",
+    icon: assets.compass_icon,
+  },
+  {
+    text: "Give me tips to help care for a tricky plant",
+    icon: assets.bulb_icon,
+  },
+  {
+    text: "Come up with a product name for a new app",
+    icon: assets.message_icon,
+  },
+  {
+    text: "Explain how something works like an engineer",
+    icon: assets.code_icon,
+  },
+];
 
 export default Main;

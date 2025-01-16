@@ -1,75 +1,128 @@
-import { useContext } from "react";
-import { assets } from "../../assets/assets";
-import { Context } from "../../context/context";
+import React, { useContext } from 'react';
+import { Context } from '../../context/context';
+import { assets } from '../../assets/assets';
 
-const Sidebar = () => {
-  const context = useContext(Context);
+interface SidebarItemProps {
+  icon: string;
+  text: string;
+  onClick?: () => void;
+  extended: boolean;
+}
+
+interface ContextType {
+  extended: boolean;
+  setExtended: React.Dispatch<React.SetStateAction<boolean>>;
+  previousPrompt?: string[];
+}
+
+const SidebarItem: React.FC<SidebarItemProps> = ({ 
+  icon, 
+  text, 
+  onClick, 
+  extended 
+}) => (
+  <div 
+    onClick={onClick}
+    className="flex items-center gap-3 p-3 rounded-full transition-colors hover:bg-gray-200 cursor-pointer"
+  >
+    <img src={icon} alt="" className="w-5 h-5 min-w-5" />
+    {extended && <span className="text-gray-700 text-sm whitespace-nowrap">{text}</span>}
+  </div>
+);
+
+const Sidebar: React.FC = () => {
+  const context = useContext<ContextType | null>(Context as any);
 
   if (!context) {
-    return <div>Error: Context not available</div>;
+    return (
+      <div className="p-4 text-red-500 bg-red-100 rounded">
+        Error: Context not available
+      </div>
+    );
   }
 
-  const { extended, setExtended, previousPrompt } = context;
+  const { extended, setExtended, previousPrompt = [] } = context;
+
+  const handleToggleExtended = (): void => {
+    setExtended((prev: boolean) => !prev);
+  };
 
   return (
-    <div
-      className={`min-h-screen inline-flex flex-col justify-between bg-[#f0f4f9] p-6 transition-all ease-in-out duration-300 ${
-        extended ? "w-64" : "w-24"
-      }`}
+    <aside 
+      className={`
+        fixed left-0 top-0 h-screen
+        bg-[#f0f4f9] shadow-sm
+        flex flex-col justify-between
+        transition-all duration-300 ease-in-out
+        ${extended ? 'w-64' : 'w-20'}
+        p-4
+      `}
     >
-      <div className="">
-        <img
-          className="w-5 h-5 block ml-2.5 cursor-pointer"
-          src={assets.menu_icon}
-          alt=""
-          onClick={() => {
-            setExtended((prev: boolean) => !prev);
-          }}
-        />
-        <div className="mt-12 p-2 inline-flex items-center gap-2.5 px-2 py-2 bg-[#e6eaf1] rounded-[50px] text-sm text-gray-400 cursor-pointer">
-          {/* // new Chat */}
-          <img className="w-5 h-6" src={assets.plus_icon} alt="" />
-          {extended ? <p>New Chat</p> : null}
-        </div>
-        {extended ? (
-          <div className="flex flex-col">
-            {/* // recent */}
-            <p className="mt-7 mb-5">
-              {/* recent title */}
-              Recent
-            </p>
-            {previousPrompt?.map((item, index) => {
-              return (
-                <div
-                  key={index}
-                  className="flex items-start gap-2.5 p-2.5 pr-10 rounded-[50px] text-[#282828] cursor-pointer hover:bg-[#e2e6eb]"
-                >
-                  <img className="w-5" src={assets.message_icon} alt="" />
-                  <p>{item.slice(0, 18)} ...</p>
-                </div>
-              );
-            })}
+      {/* Top Section */}
+      <div className="space-y-6">
+        {/* Menu Toggle */}
+        <button
+          onClick={handleToggleExtended}
+          className="p-2 hover:bg-gray-200 rounded-full transition-colors"
+          type="button"
+          aria-label="Toggle sidebar"
+        >
+          <img 
+            src={assets.menu_icon} 
+            alt="Toggle Menu"
+            className="w-5 h-5" 
+          />
+        </button>
+
+        {/* New Chat Button */}
+        <div className="px-1">
+          <div 
+            role="button"
+            tabIndex={0}
+            className="flex items-center gap-3 p-3 bg-[#e6eaf1] rounded-full cursor-pointer hover:bg-gray-200 transition-colors"
+          >
+            <img src={assets.plus_icon} alt="New Chat" className="w-5 h-5" />
+            {extended && <span className="text-gray-600 text-sm">New Chat</span>}
           </div>
-        ) : null}
+        </div>
+
+        {/* Recent Chats Section */}
+        {extended && previousPrompt.length > 0 && (
+          <div className="mt-8">
+            <h2 className="text-sm font-medium text-gray-500 px-4 mb-3">Recent</h2>
+            <div className="space-y-1">
+              {previousPrompt.map((item: string, index: number) => (
+                <SidebarItem
+                  key={index}
+                  icon={assets.message_icon}
+                  text={item.length > 25 ? `${item.slice(0, 25)}...` : item}
+                  extended={extended}
+                />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
-      <div className="flex flex-col">
-        <div className="flex items-center gap-2.5 p-2.5 pr-2.5 rounded-[50px] text-[#282828] cursor-pointer hover:bg-[#e2e6eb]">
-          {/* bottom */}
-          <img className="w-5 h-5" src={assets.question_icon} alt="" />
-          {extended ? <p>Help</p> : null}
-        </div>
-        <div className="flex items-center gap-2.5 p-2.5 pr-2.5 rounded-[50px] text-[#282828] cursor-pointer hover:bg-[#e2e6eb]">
-          {/* bottom */}
-          <img className="w-5 h-5" src={assets.history_icon} alt="" />
-          {extended ? <p>Activity</p> : null}
-        </div>
-        <div className="flex items-center gap-2.5 p-2.5 pr-2.5 rounded-[50px] text-[#282828] cursor-pointer hover:bg-[#e2e6eb]">
-          {/* bottom */}
-          <img className="w-5 h-5 " src={assets.setting_icon} alt="" />
-          {extended ? <p>Settings</p> : null}
-        </div>
+
+      {/* Bottom Section */}
+      <div className="space-y-1">
+        <SidebarItem
+          icon={assets.question_icon}
+          text="Help"
+          extended={extended}
+        />
+        <SidebarItem
+          icon={assets.history_icon}
+          text="Activity"
+          extended={extended}
+        />
+        <SidebarItem
+          icon={assets.setting_icon}
+          text="Settings"
+          extended={extended}
+        />
       </div>
-    </div>
+    </aside>
   );
 };
 

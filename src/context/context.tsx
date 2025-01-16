@@ -35,14 +35,15 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({ child
     // Split text into parts using code block markers
     const parts = text.split(/(```[\s\S]*?```)/g);
     
-    return parts.map((part, index) => {
+    return parts.map((part, _) => {
       if (part.startsWith('```') && part.endsWith('```')) {
         // Extract language if specified
         const firstLineEnd = part.indexOf('\n');
         const firstLine = part.slice(3, firstLineEnd).trim();
         const code = part.slice(firstLineEnd + 1, -3).trim();
         
-        return `<pre key="code-${index}" class="code-block ${firstLine}"><code>${code}</code></pre>`;
+        // Add syntax highlighting class based on language
+        return `<pre class="code-block language-${firstLine}"><code>${code}</code></pre>`;
       }
       return part;
     }).join('');
@@ -50,27 +51,45 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   const formatMarkdown = (text: string) => {
     if (!text) return "";
-
+  
     let formattedText = text;
-
+  
     // 1. Handle code blocks first
     formattedText = formatMarkdownCodeBlocks(formattedText);
-
-    // 2. Handle bold text with numbered items
-    formattedText = formattedText.replace(/\*\*(\d+\.\s*[^*]+)\*\*/g, (_, content) => {
-      return `<br/><b>${content}</b><br/>`;
+  
+    // 2. Handle headers
+    formattedText = formattedText.replace(/#{1,6}\s+([^\n]+)/g, (match, content) => {
+      const level = match.trim().split(' ')[0].length;
+      return `<h${level}>${content}</h${level}><br/>`;
     });
-
-    // 3. Handle remaining bold text
+  
+    // 3. Handle numbered lists with bold items
+    formattedText = formattedText.replace(/(\d+\.\s*)\*\*([^*]+)\*\*/g, (_, number, content) => {
+      return `<div class="list-item"><span class="number">${number}</span><b>${content}</b></div>`;
+    });
+  
+    // 4. Handle regular bold text
     formattedText = formattedText.replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>');
-
-    // 4. Handle paragraphs and line breaks
+  
+    // 5. Handle inline code
+    formattedText = formattedText.replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>');
+  
+    // 6. Handle lists
+    formattedText = formattedText.replace(/^\s*[-*]\s+(.+)$/gm, '<li>$1</li>');
+  
+    // 7. Handle paragraphs
     formattedText = formattedText
       .split('\n')
-      .map(line => line.trim())
+      .map(line => {
+        line = line.trim();
+        if (line && !line.startsWith('<')) {
+          return `<p>${line}</p>`;
+        }
+        return line;
+      })
       .filter(line => line)
-      .join('<br/><br/>');
-
+      .join('\n');
+  
     return formattedText;
   };
 
@@ -78,38 +97,31 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({ child
     if (!text) return;
     
     setAnimationInProgress(true);
-    const parts = text.split(/(<.*?>)/g);
+    const parts = text.split(/(<[^>]+>)/g);
     let currentIndex = 0;
     let buffer = '';
-
+  
     const animatePart = () => {
       if (currentIndex < parts.length) {
         const part = parts[currentIndex];
         
         if (part.startsWith('<') && part.endsWith('>')) {
           buffer += part;
-          currentIndex++;
         } else {
-          const words = part.split(' ');
-          const word = words[0];
-          if (word) {
-            buffer += word + ' ';
-            parts[currentIndex] = words.slice(1).join(' ');
-            if (parts[currentIndex].length === 0) {
-              currentIndex++;
-            }
-          } else {
-            currentIndex++;
-          }
+          buffer += part;
         }
         
+        currentIndex++;
         setresultData(buffer);
-        requestAnimationFrame(() => setTimeout(animatePart, 75));
-      } else {
-        setAnimationInProgress(false);
+        
+        if (currentIndex < parts.length) {
+          requestAnimationFrame(() => setTimeout(animatePart, 50));
+        } else {
+          setAnimationInProgress(false);
+        }
       }
     };
-
+  
     animatePart();
   }, []);
 
