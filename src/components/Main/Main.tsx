@@ -77,7 +77,7 @@ const Main: React.FC = () => {
     >
       <Header />
       <main className="flex-1 overflow-y-auto">
-        <div className="max-w-[1900px] mx-auto px-6 md:px-20 lg:px-40 py-5">
+        <div className="mx-auto px-6 md:px-20 lg:px-40 py-5">
           {!showResult ? (
             <InitialView />
           ) : (
@@ -154,7 +154,7 @@ const SuggestionCard: React.FC<SuggestionCardProps> = ({ text, icon }) => (
 
 // Result View Components
 const ResultView: React.FC<ResultViewProps> = ({ recentPrompt, loading, resultData }) => (
-  <div className="py-8 min-h-[calc(100vh-200px)] max-w-screen mx-auto">
+  <div className="py-8 min-h-[calc(100vh-200px)] max-w">
     <UserPrompt prompt={recentPrompt} />
     <GeminiResponse loading={loading} resultData={resultData} />
   </div>
