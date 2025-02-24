@@ -2,6 +2,8 @@ import React, { useContext } from "react";
 import { assets } from "../../assets/assets";
 import { Context } from "../../context/context";
 import { grid } from "ldrs";
+import Header from "./Header";
+import { ThemeContext } from "../../context/ThemeContext";
 
 grid.register();
 
@@ -40,10 +42,11 @@ interface FooterProps {
 // Main Component
 const Main: React.FC = () => {
   const context = useContext<ContextType | null>(Context as any);
+  // Removed unused isDarkMode from ThemeContext in Main component
 
   if (!context) {
     return (
-      <div className="flex items-center justify-center h-screen text-red-500 bg-red-50">
+      <div className="flex items-center justify-center h-screen text-red-500 bg-red-50 dark:bg-red-900/50 dark:text-red-200">
         Error: Context not available
       </div>
     );
@@ -70,7 +73,7 @@ const Main: React.FC = () => {
   return (
     <div 
       className={`
-        flex flex-col min-h-screen bg-white
+        flex flex-col min-h-screen bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200
         ${extended ? 'ml-64' : 'ml-20'}
         transition-all duration-300
       `}
@@ -99,21 +102,7 @@ const Main: React.FC = () => {
     </div>
   );
 };
-// Header Component
-const Header: React.FC = () => (
-  <header className="sticky top-0 right-0 bg-white/80 backdrop-blur-sm border-b shadow-sm z-10">
-    <div className="max-w-[1900px] mx-auto px-6 py-4 flex items-center justify-between">
-      <div className="flex items-center gap-2">
-        <span className="text-lg font-semibold text-gray-700">Gemini</span>
-      </div>
-      <img
-        className="w-10 h-10 rounded-full shadow-sm cursor-pointer hover:opacity-90 transition-opacity"
-        src={assets.user_icon}
-        alt="User Profile"
-      />
-    </div>
-  </header>
-);
+
 // Initial View Components
 const InitialView: React.FC = () => (
   <div className="py-12 max-w-6xl mx-auto">
@@ -124,12 +113,12 @@ const InitialView: React.FC = () => (
 
 const WelcomeMessage: React.FC = () => (
   <div className="mb-16 text-center">
-    <h1 className="text-5xl md:text-6xl font-bold text-gray-700 mb-4">
+    <h1 className="text-5xl md:text-6xl font-bold text-gray-700 dark:text-gray-200 mb-4">
       <span className="bg-gradient-to-r from-blue-500 to-red-500 bg-clip-text text-transparent">
         Hello, Dev.
       </span>
     </h1>
-    <p className="text-4xl md:text-5xl font-semibold text-gray-500">
+    <p className="text-4xl md:text-5xl font-semibold text-gray-500 dark:text-gray-400">
       How can I help you today?
     </p>
   </div>
@@ -144,9 +133,9 @@ const SuggestionGrid: React.FC = () => (
 );
 
 const SuggestionCard: React.FC<SuggestionCardProps> = ({ text, icon }) => (
-  <div className="group h-[200px] p-6 bg-gray-50 rounded-2xl relative cursor-pointer hover:bg-gray-100 transition-all duration-300 shadow-sm hover:shadow-md">
-    <p className="text-gray-700 text-lg font-medium leading-relaxed">{text}</p>
-    <div className="absolute bottom-4 right-4 bg-white p-2 rounded-xl shadow-sm group-hover:shadow-md transition-all">
+  <div className="group h-[200px] p-6 bg-gray-50 dark:bg-gray-800 rounded-2xl relative cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300 shadow-sm hover:shadow-md">
+    <p className="text-gray-700 dark:text-gray-200 text-lg font-medium leading-relaxed">{text}</p>
+    <div className="absolute bottom-4 right-4 bg-white dark:bg-gray-700 p-2 rounded-xl shadow-sm group-hover:shadow-md transition-all">
       <img className="w-8 h-8" src={icon} alt="" />
     </div>
   </div>
@@ -161,53 +150,58 @@ const ResultView: React.FC<ResultViewProps> = ({ recentPrompt, loading, resultDa
 );
 
 const UserPrompt: React.FC<{ prompt: string }> = ({ prompt }) => (
-  <div className="flex items-start gap-5 mb-8 p-4 bg-gray-50 rounded-2xl">
+  <div className="flex items-start gap-5 mb-8 p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl">
     <img
       className="w-10 h-10 rounded-full shadow-sm"
       src={assets.user_icon}
       alt="User"
     />
-    <p className="flex-1 text-gray-700 leading-relaxed pt-1">{prompt}</p>
+    <p className="flex-1 text-gray-700 dark:text-gray-200 leading-relaxed pt-1">{prompt}</p>
   </div>
 );
 
 const GeminiResponse: React.FC<{ loading: boolean; resultData: string }> = ({
   loading,
   resultData,
-}) => (
-  <div className="flex items-start gap-5 p-4 bg-blue-50 rounded-2xl">
-    <img
-      className="w-10 h-10 rounded-full shadow-sm"
-      src={assets.gemini_icon}
-      alt="Gemini"
-    />
-    {loading ? (
-      <div className="flex-1 flex justify-center py-8">
-        <l-grid size="100" speed="2.8" color="#61ABFF" />
-      </div>
-    ) : (
-      <div
-        className="flex-1 prose prose-blue max-w-none leading-relaxed pt-1"
-        dangerouslySetInnerHTML={{ __html: resultData }}
+}) => {
+  // Keep ThemeContext here since it's actually used for the loading spinner color
+  const { isDarkMode } = useContext(ThemeContext);
+  
+  return (
+    <div className="flex items-start gap-5 p-4 bg-blue-50 dark:bg-blue-900/30 rounded-2xl">
+      <img
+        className="w-10 h-10 rounded-full shadow-sm"
+        src={assets.gemini_icon}
+        alt="Gemini"
       />
-    )}
-  </div>
-);
+      {loading ? (
+        <div className="flex-1 flex justify-center py-8">
+          <l-grid size="100" speed="2.8" color={isDarkMode ? "#90CAF9" : "#61ABFF"} />
+        </div>
+      ) : (
+        <div
+          className="flex-1 prose prose-blue dark:prose-invert max-w-none leading-relaxed pt-1"
+          dangerouslySetInnerHTML={{ __html: resultData }}
+        />
+      )}
+    </div>
+  );
+};
 
 // Footer Component
 const Footer: React.FC<FooterProps> = ({
   input,
   setInput,
   onSent,
-  handleKeyDown,
+  handleKeyDown
 }) => (
-  <footer className="sticky bottom-0 right-0 bg-white border-t shadow-sm z-10">
+  <footer className="sticky bottom-0 right-0 bg-white dark:bg-gray-900 border-t dark:border-gray-700 shadow-sm z-10">
     <div className="max-w-3xl mx-auto px-4 py-4">
-      <div className="flex items-center gap-4 bg-gray-50 px-6 py-3 rounded-full shadow-sm">
+      <div className="flex items-center gap-4 bg-gray-50 dark:bg-gray-800 px-6 py-3 rounded-full shadow-sm">
         <input
           onChange={(e) => setInput(e.target.value)}
           value={input}
-          className="flex-1 bg-transparent border-none outline-none text-gray-700 placeholder-gray-400"
+          className="flex-1 bg-transparent border-none outline-none text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500"
           type="text"
           placeholder="Enter a prompt here..."
           onKeyDown={handleKeyDown}
@@ -227,7 +221,7 @@ const Footer: React.FC<FooterProps> = ({
           </button>
         </div>
       </div>
-      <p className="text-sm text-center mt-3 text-gray-500">
+      <p className="text-sm text-center mt-3 text-gray-500 dark:text-gray-400">
         Gemini may display inaccurate info, including about people, so double-check
         its responses. Your privacy and Gemini Apps.
       </p>

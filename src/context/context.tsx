@@ -32,21 +32,11 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const [animationInProgress, setAnimationInProgress] = useState<boolean>(false);
 
   const formatMarkdownCodeBlocks = (text: string) => {
-    // Split text into parts using code block markers
-    const parts = text.split(/(```[\s\S]*?```)/g);
-    
-    return parts.map((part, _) => {
-      if (part.startsWith('```') && part.endsWith('```')) {
-        // Extract language if specified
-        const firstLineEnd = part.indexOf('\n');
-        const firstLine = part.slice(3, firstLineEnd).trim();
-        const code = part.slice(firstLineEnd + 1, -3).trim();
-        
-        // Add syntax highlighting class based on language
-        return `<pre class="code-block language-${firstLine}"><code>${code}</code></pre>`;
-      }
-      return part;
-    }).join('');
+    // Handle triple backtick code blocks
+    return text.replace(/(```(\w*)\n([\s\S]*?)\n```)/g, (_, language, code) => {
+      language = language.trim();
+      return `<pre class="code-block ${language ? `language-${language}` : ''}"><code>${code}</code></pre>`;
+    });
   };
 
   const formatMarkdown = (text: string) => {
@@ -54,41 +44,45 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({ child
   
     let formattedText = text;
   
-    // 1. Handle code blocks first
+    // 1. Handle code blocks first (preserve them from other transformations)
     formattedText = formatMarkdownCodeBlocks(formattedText);
   
     // 2. Handle headers
-    formattedText = formattedText.replace(/#{1,6}\s+([^\n]+)/g, (match, content) => {
-      const level = match.trim().split(' ')[0].length;
-      return `<h${level}>${content}</h${level}><br/>`;
+    formattedText = formattedText.replace(/^(#{1,6})\s+(.+)$/gm, (_, hashes, content) => {
+      const level = hashes.length;
+      return `<h${level}>${content}</h${level}>`;
     });
   
-    // 3. Handle numbered lists with bold items
-    formattedText = formattedText.replace(/(\d+\.\s*)\*\*([^*]+)\*\*/g, (_, number, content) => {
-      return `<div class="list-item"><span class="number">${number}</span><b>${content}</b></div>`;
-    });
-  
-    // 4. Handle regular bold text
+    // 3. Handle bold text
     formattedText = formattedText.replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>');
+  
+    // 4. Handle italic text
+    formattedText = formattedText.replace(/\*([^*]+)\*/g, '<i>$1</i>');
   
     // 5. Handle inline code
     formattedText = formattedText.replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>');
   
-    // 6. Handle lists
-    formattedText = formattedText.replace(/^\s*[-*]\s+(.+)$/gm, '<li>$1</li>');
+    // 6. Handle unordered lists
+    formattedText = formattedText.replace(/^(\s*)-\s+(.+)$/gm, '<li>$2</li>');
   
-    // 7. Handle paragraphs
-    formattedText = formattedText
-      .split('\n')
-      .map(line => {
-        line = line.trim();
-        if (line && !line.startsWith('<')) {
-          return `<p>${line}</p>`;
-        }
-        return line;
-      })
-      .filter(line => line)
-      .join('\n');
+    // 7. Handle ordered lists
+    formattedText = formattedText.replace(/^(\s*)(\d+)\.\s+(.+)$/gm, (_, num, content) => {
+      // Check if content is bold
+      if (content.startsWith('<b>') && content.endsWith('</b>')) {
+        return `<div class="list-item"><span class="number">${num}. </span>${content}</div>`;
+      }
+      return `<li>${content}</li>`;
+    });
+  
+    // 8. Handle paragraphs - preserve existing HTML tags
+    const paragraphs = formattedText.split('\n\n');
+    formattedText = paragraphs.map(para => {
+      para = para.trim();
+      if (para && !para.startsWith('<')) {
+        return `<p>${para}</p>`;
+      }
+      return para;
+    }).join('\n');
   
     return formattedText;
   };
@@ -97,6 +91,7 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({ child
     if (!text) return;
     
     setAnimationInProgress(true);
+    // Split by HTML tags to preserve them during animation
     const parts = text.split(/(<[^>]+>)/g);
     let currentIndex = 0;
     let buffer = '';
@@ -104,18 +99,13 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const animatePart = () => {
       if (currentIndex < parts.length) {
         const part = parts[currentIndex];
-        
-        if (part.startsWith('<') && part.endsWith('>')) {
-          buffer += part;
-        } else {
-          buffer += part;
-        }
-        
+        buffer += part;
         currentIndex++;
+        
         setresultData(buffer);
         
         if (currentIndex < parts.length) {
-          requestAnimationFrame(() => setTimeout(animatePart, 50));
+          setTimeout(animatePart, 15); // Slightly faster animation
         } else {
           setAnimationInProgress(false);
         }
@@ -140,15 +130,18 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({ child
         throw new Error("Empty response received");
       }
       
+      // Format and animate the response
       const formattedResponse = formatMarkdown(response);
       delayPara(formattedResponse);
+      
+      // Clear the input field
       setInput("");
       
       // Update previous prompts
-      setpreviousPrompt(prev => prev ? [...prev, prompt] : [prompt]);
+      setpreviousPrompt(prev => (prev ? [...prev, prompt] : [prompt]));
     } catch (error) {
       console.error("Error:", error);
-      setresultData("Error processing request. Please try again.");
+      setresultData("<p>Error processing request. Please try again.</p>");
     } finally {
       setLoading(false);
     }

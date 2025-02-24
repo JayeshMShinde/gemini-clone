@@ -4,18 +4,18 @@
 @tailwind components;
 @tailwind utilities;
 
-*{
-  font-family: Outfit;
+* {
+  font-family: 'Outfit', sans-serif;
 }
-#root{
+
+#root {
   min-height: 100vh;
   display: flex;
 }
 
-
+/* Code Block Styling */
 .code-block {
-  background: #111111;
-  color: #d4d4d4;
+  @apply relative bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200;
   padding: 1rem;
   margin: 1rem 0;
   border-radius: 6px;
@@ -23,7 +23,8 @@
   font-size: 14px;
   line-height: 1.5;
   overflow-x: auto;
-  border: 1px solid #2d2d2d;
+  border: 1px solid;
+  @apply border-gray-200 dark:border-gray-700;
 }
 
 .code-block code {
@@ -36,29 +37,29 @@
   min-height: 1.5em;
 }
 
-/* Python-specific syntax highlighting */
+/* Python-specific syntax highlighting - works in both modes */
 .code-block .keyword {
-  color: #569cd6;
+  @apply text-blue-600 dark:text-blue-400;
 }
 
 .code-block .string {
-  color: #ce9178;
+  @apply text-orange-600 dark:text-orange-300;
 }
 
 .code-block .comment {
-  color: #6a9955;
+  @apply text-green-600 dark:text-green-400;
 }
 
 .code-block .number {
-  color: #b5cea8;
+  @apply text-green-700 dark:text-green-300;
 }
 
 .code-block .function {
-  color: #dcdcaa;
+  @apply text-yellow-600 dark:text-yellow-300;
 }
 
 .code-block .builtin {
-  color: #4ec9b0;
+  @apply text-teal-600 dark:text-teal-300;
 }
 
 .code-block::before {
@@ -66,31 +67,22 @@
   position: absolute;
   top: 0;
   right: 0;
-  background: #2d2d2d;
-  color: #858585;
+  @apply bg-gray-300 dark:bg-gray-700 text-gray-600 dark:text-gray-400;
   padding: 0.25rem 0.75rem;
   font-size: 0.75rem;
   border-radius: 0 6px 0 6px;
   text-transform: lowercase;
 }
 
-/* Fix for empty lines */
-.code-block {
-  background-color: #111111;
-  border-radius: 6px;
-  padding: 16px;
-  margin: 16px 0;
-  overflow-x: auto;
-  font-family: monospace;
-}
-
+/* Inline code styling */
 .inline-code {
-  background-color: #f6f8fa;
+  @apply bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200;
   padding: 2px 4px;
   border-radius: 3px;
   font-family: monospace;
 }
 
+/* List items */
 .list-item {
   margin: 8px 0;
   display: flex;
@@ -98,21 +90,25 @@
 }
 
 .list-item .number {
-  color: #666;
+  @apply text-gray-600 dark:text-gray-400;
   min-width: 24px;
 }
 
+/* Typography */
 h1, h2, h3, h4, h5, h6 {
   margin: 24px 0 16px;
   font-weight: 600;
   line-height: 1.25;
+  @apply text-gray-900 dark:text-gray-100;
 }
 
 p {
   line-height: 1.5;
+  @apply text-gray-800 dark:text-gray-200;
 }
 
 li {
   margin: 8px 0;
   line-height: 1.5;
+  @apply text-gray-800 dark:text-gray-200;
 }
