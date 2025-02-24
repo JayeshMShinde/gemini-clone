@@ -115,11 +115,11 @@ const WelcomeMessage: React.FC = () => (
   <div className="mb-16 text-center">
     <h1 className="text-5xl md:text-6xl font-bold text-gray-700 dark:text-gray-200 mb-4">
       <span className="bg-gradient-to-r from-blue-500 to-red-500 bg-clip-text text-transparent">
-        Hello, Dev.
+        
       </span>
     </h1>
     <p className="text-4xl md:text-5xl font-semibold text-gray-500 dark:text-gray-400">
-      How can I help you today?
+      
     </p>
   </div>
 );
