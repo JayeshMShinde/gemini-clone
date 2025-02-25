@@ -9,7 +9,7 @@ const Header: React.FC = () => {
     <header className="sticky top-0 right-0 bg-white/80 dark:bg-gray-900/90 backdrop-blur-sm border-b dark:border-gray-700 shadow-sm z-10 transition-colors duration-300">
       <div className="max-w-[1900px] mx-auto px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-lg font-semibold text-gray-700 dark:text-gray-200">Gemini</span>
+          <span className="text-lg font-semibold text-gray-700 dark:text-gray-200">This is beyond the science</span>
         </div>
         <div className="flex items-center gap-4">
           <button 
