@@ -222,8 +222,7 @@ const Footer: React.FC<FooterProps> = ({
         </div>
       </div>
       <p className="text-sm text-center mt-3 text-gray-500 dark:text-gray-400">
-        Gemini may display inaccurate info, including about people, so double-check
-        its responses. Your privacy and Gemini Apps.
+        गेमिनी की जानकारी में गलतियाँ हो सकती हैं! अपनी जानकारी को दो बार जाँच लें! गेमिनी ऐप्स का उपयोग करके, आप अपनी गोपनीयता की रक्षा कर सकते हैं!
       </p>
     </div>
   </footer>
