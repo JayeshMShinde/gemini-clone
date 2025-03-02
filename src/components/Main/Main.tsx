@@ -319,11 +319,11 @@ const SuggestionGrid: React.FC = () => {
 const SuggestionCard = ({
   text,
   iconComponent,
-  index = 0,
+  index,
 }: {
   text: string;
   iconComponent: React.ReactNode;
-  index?: number;
+  index: number;
 }) => {
   const { isDarkMode } = useContext(ThemeContext);
 
@@ -422,9 +422,9 @@ const GeminiResponse: React.FC<{ loading: boolean; resultData: string }> = ({
   return (
     <div
       className={`
-      flex items-start gap-5 p-4 rounded-2xl animate-text-fade
-      ${isDarkMode ? "bg-blue-900/20" : "bg-blue-50"}
-    `}
+          flex items-start gap-5 p-4 rounded-2xl animate-text-fade
+          ${isDarkMode ? "bg-blue-900/20" : "bg-blue-50"}
+        `}
     >
       <div className="w-10 h-10 rounded-full shadow-sm overflow-hidden text-neon">
         <GeminiIcon isDarkMode={isDarkMode} />
@@ -455,10 +455,10 @@ const Footer: React.FC<FooterProps> = ({
   input,
   setInput,
   onSent,
-  handleKeyDown,
+  handleKeyDown
 }) => {
   const { isDarkMode } = useContext(ThemeContext);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
   // Auto-resize textarea based on content
   useEffect(() => {
@@ -493,21 +493,21 @@ const Footer: React.FC<FooterProps> = ({
   return (
     <footer
       className={`
-      sticky bottom-0 right-0 z-10
-      ${
-        isDarkMode
-          ? "bg-gray-900/95 border-t border-gray-700"
-          : "bg-white/95 border-t border-gray-200"
-      }
-      backdrop-blur-md shadow-sm
-    `}
+          sticky bottom-0 right-0 z-10
+          ${
+            isDarkMode
+              ? "bg-gray-900/95 border-t border-gray-700"
+              : "bg-white/95 border-t border-gray-200"
+          }
+          backdrop-blur-md shadow-sm
+        `}
     >
       <div className="max-w-3xl mx-auto px-4 py-4">
         <div
           className={`
-          flex items-center gap-4 px-6 py-3 rounded-full shadow-sm
-          ${isDarkMode ? "bg-gray-800" : "bg-gray-50"}
-        `}
+              flex items-center gap-4 px-6 py-3 rounded-full shadow-sm
+              ${isDarkMode ? "bg-gray-800" : "bg-gray-50"}
+            `}
         >
           <textarea
             ref={textareaRef}
@@ -528,18 +528,18 @@ const Footer: React.FC<FooterProps> = ({
             <button
               onClick={() => input.trim() && onSent(input)}
               className={`
-                p-2 rounded-full transition-colors
-                ${
-                  input.trim()
-                    ? "opacity-100 text-rainbow"
-                    : "opacity-50 cursor-not-allowed"
-                }
-                ${
-                  isDarkMode
-                    ? "hover:bg-gray-700 active:bg-gray-600"
-                    : "hover:bg-gray-200 active:bg-gray-300"
-                }
-              `}
+                    p-2 rounded-full transition-colors
+                    ${
+                      input.trim()
+                        ? "opacity-100 text-rainbow"
+                        : "opacity-50 cursor-not-allowed"
+                    }
+                    ${
+                      isDarkMode
+                        ? "hover:bg-gray-700 active:bg-gray-600"
+                        : "hover:bg-gray-200 active:bg-gray-300"
+                    }
+                  `}
               disabled={!input.trim()}
             >
               <SendIcon isDarkMode={isDarkMode} />
