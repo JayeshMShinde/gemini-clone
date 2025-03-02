@@ -17,6 +17,70 @@
   @apply bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100;
 }
 
+/* Text Animation */
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes gradientFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-text-fade {
+  animation: fadeIn 0.8s ease forwards;
+  opacity: 0;
+}
+
+.animate-text-fade-delay-1 {
+  animation: fadeIn 0.8s ease 0.1s forwards;
+  opacity: 0;
+}
+
+.animate-text-fade-delay-2 {
+  animation: fadeIn 0.8s ease 0.2s forwards;
+  opacity: 0;
+}
+
+.animate-text-fade-delay-3 {
+  animation: fadeIn 0.8s ease 0.3s forwards;
+  opacity: 0;
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  background-image: linear-gradient(45deg, #4776E6, #8E54E9, #4776E6);
+  animation: gradientFlow 3s ease infinite;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.typing-animation::after {
+  content: '|';
+  display: inline-block;
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
 /* Code Block Styling */
 .code-block {
   @apply relative bg-gray-900 text-gray-100 rounded-lg shadow-lg;
@@ -83,4 +147,25 @@ p {
 
 li {
   @apply text-gray-800 dark:text-gray-200 leading-relaxed;
+}
+
+@keyframes gradient-animation {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.gradient-text {
+  background: linear-gradient(to right, #3b2afb, purple);
+  background-size: 200% 200%;
+  animation: gradient-animation 5s ease-in-out infinite;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text; /* Standard syntax for modern browsers */
 }
