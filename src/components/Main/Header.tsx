@@ -9,7 +9,7 @@ const Header: React.FC = () => {
     <header className="sticky top-0 right-0 bg-white/90 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 shadow-sm z-10">
       <div className="max-w-[1900px] mx-auto px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-lg font-semibold text-gray-800 dark:text-gray-100">Balle Balle Bonanza</span>
+          <span className="text-lg font-semibold text-gray-800 dark:text-gray-100">Coders ke sath bhi, debugging ke baad bhi! 🛠️🐞</span>
         </div>
         <div className="flex items-center gap-4">
           <button 
