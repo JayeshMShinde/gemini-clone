@@ -266,7 +266,7 @@ const WelcomeMessage: React.FC = () => {
   return (
     <div className="mb-16 text-center">
       <h1 className="text-5xl md:text-6xl font-bold text-gray-800 dark:text-gray-100 mb-4">
-        <span className="gradient-text">Ram Ram Madli</span>
+        <span className="gradient-text">Ram Ram Mandli</span>
       </h1>
       <p className="text-4xl md:text-5xl font-semibold text-gray-600 dark:text-gray-300">
         How can I help you today?
