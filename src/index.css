@@ -1,4 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+/* @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@100..900&display=swap'); */
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&family=Rubik:ital,wght@0,300..900;1,300..900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,7 +10,7 @@
 
 /* Global Styles */
 * {
-  font-family: 'Outfit', sans-serif;
+  font-family: "Rubik", sans-serif;
   @apply antialiased;
 }
 
@@ -14,66 +18,127 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  @apply bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100;
+  @apply bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200 dark:from-gray-900 dark:via-gray-800 dark:to-gray-700 text-gray-900 dark:text-gray-100;
 }
 
-/* Text Animation */
+/* Enhanced Text Animation */
 @keyframes fadeIn {
   0% {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(20px) scale(0.98);
   }
   100% {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 
+/* Keep the gradient flow animation */
 @keyframes gradientFlow {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
-.animate-text-fade {
-  animation: fadeIn 0.8s ease forwards;
-  opacity: 0;
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 0 5px rgba(99, 102, 241, 0.3); }
+  50% { box-shadow: 0 0 15px rgba(99, 102, 241, 0.6); }
 }
 
-.animate-text-fade-delay-1 {
-  animation: fadeIn 0.8s ease 0.1s forwards;
-  opacity: 0;
-}
+.animate-text-fade { animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards; opacity: 0; }
+.animate-text-fade-delay-1 { animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.2s forwards; opacity: 0; }
+.animate-text-fade-delay-2 { animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.4s forwards; opacity: 0; }
+.animate-text-fade-delay-3 { animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) 0.6s forwards; opacity: 0; }
 
-.animate-text-fade-delay-2 {
-  animation: fadeIn 0.8s ease 0.2s forwards;
-  opacity: 0;
-}
-
-.animate-text-fade-delay-3 {
-  animation: fadeIn 0.8s ease 0.3s forwards;
-  opacity: 0;
-}
-
-.animate-gradient {
-  background-size: 200% 200%;
-  background-image: linear-gradient(45deg, #4776E6, #8E54E9, #4776E6);
-  animation: gradientFlow 3s ease infinite;
+/* Enhanced Vibrant Gradient Text with Directional Movement */
+.gradient-text {
+  /* Change to handwritten font with fallback */
+  font-family: "Dancing Script", cursive;
+  
+  /* Keep the gradient animation */
+  background: linear-gradient(90deg, #ff6b6b, #5463ec, #ee5bc0, #fdb43d, #ff6b6b);
+  background-size: 200% 100%;
+  animation: gradientFlow 8s ease infinite;
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
+  
+  /* Add handwritten characteristics */
+  font-size: 1.5em; /* Slightly larger for better visibility */
+  letter-spacing: 1px; /* Irregular spacing */
+  transform: rotate(-1deg); /* Slight tilt for natural feel */
+  transition: all 0.3s ease;
+  padding: 0.25rem 0;
+  position: relative;
+  display: inline-block;
+  
+  /* Add subtle text shadow for depth */
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
 }
 
-.typing-animation::after {
-  content: '|';
+.gradient-text:hover {
+  filter: brightness(1.2);
+  animation-duration: 3s;
+  transform: rotate(0deg) scale(1.05); /* Straightens and slightly enlarges */
+}
+
+/* Add subtle underline effect to gradient text */
+.gradient-text::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #96c93d, #ff6b6b);
+  background-size: 200% 100%;
+  animation: gradientFlow 8s linear infinite;
+  border-radius: 3px;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.5s ease;
+}
+
+.gradient-text:hover::after {
+  transform: scaleX(1);
+}
+
+/* Glassmorphism Response Containers */
+.response-container {
+  @apply rounded-2xl shadow-lg transition-all duration-500 overflow-hidden backdrop-blur-md;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.user-prompt-container {
+  @apply bg-white/70 dark:bg-gray-800/70 border border-gray-200/50 dark:border-gray-700/50;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.gemini-response-container {
+  @apply bg-white/80 dark:bg-gray-800/80 border-l-4 border border-gray-200/50 dark:border-gray-700/50;
+  border-left-color: #ff6b6b;
+  box-shadow: 0 8px 32px rgba(255, 107, 107, 0.15);
+  animation: glowPulse 3s infinite ease-in-out;
+}
+
+/* Enhanced Typing Animation */
+.enhanced-typing {
+  position: relative;
+}
+
+.enhanced-typing::after {
+  content: '';
+  position: absolute;
   display: inline-block;
-  animation: blink 1s step-end infinite;
+  width: 8px;
+  height: 24px;
+  background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+  margin-left: 4px;
+  animation: blink 0.8s infinite, gradientFlow 3s infinite;
+  border-radius: 2px;
+  transform-origin: bottom;
+  vertical-align: middle;
 }
 
 @keyframes blink {
@@ -81,91 +146,168 @@
   50% { opacity: 0; }
 }
 
-/* Code Block Styling */
-.code-block {
-  @apply relative bg-gray-900 text-gray-100 rounded-lg shadow-lg;
-  padding: 1.25rem;
-  margin: 1.5rem 0;
-  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-  font-size: 14px;
-  line-height: 1.6;
-  overflow-x: auto;
-  border-left: 4px solid theme('colors.blue.500');
+/* Welcome Message Specific Styling */
+.welcome-header {
+  @apply relative text-center mb-16;
+  perspective: 1000px;
 }
 
-.code-block code {
-  display: block;
-  white-space: pre-wrap;
+.welcome-title {
+  @apply text-5xl md:text-6xl font-bold mb-4;
+  transform-style: preserve-3d;
+  transition: transform 0.5s ease;
 }
 
-.code-block::before {
-  content: attr(data-language);
-  position: absolute;
-  top: 8px;
-  right: 12px;
-  @apply bg-blue-500 text-white text-xs px-2 py-1 rounded-md uppercase;
+.welcome-title:hover {
+  transform: rotateX(5deg) rotateY(5deg);
 }
 
-/* Syntax Highlighting */
-.code-block .keyword { @apply text-blue-400; }
-.code-block .string { @apply text-yellow-400; }
-.code-block .comment { @apply text-green-400 italic; }
-.code-block .number { @apply text-purple-400; }
-.code-block .function { @apply text-pink-400; }
-.code-block .builtin { @apply text-teal-400; }
-
-/* Inline Code */
-.inline-code {
-  @apply bg-gray-800 text-gray-200 px-2 py-1 rounded-md font-mono text-sm;
+.welcome-subtitle {
+  @apply text-4xl md:text-5xl font-semibold text-gray-600 dark:text-gray-300;
+  opacity: 0;
+  animation: fadeIn 0.8s ease-out 0.3s forwards;
 }
 
-/* Lists */
-.list-item {
-  @apply flex gap-3 items-start;
-  margin-bottom: 8px;
-}
-.list-item .number {
-  @apply text-gray-500 dark:text-gray-400 font-medium;
-  min-width: 24px;
+/* 3D Text Effect */
+.text-3d {
+  text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.1),
+               2px 2px 0 rgba(0, 0, 0, 0.05),
+               3px 3px 5px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
 }
 
-/* Typography */
-h1, h2, h3, h4, h5, h6 {
-  @apply font-bold leading-tight;
+.text-3d:hover {
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.1),
+               4px 4px 0 rgba(0, 0, 0, 0.05),
+               6px 6px 10px rgba(0, 0, 0, 0.05);
 }
 
-h1 { @apply text-4xl mb-4; }
-h2 { @apply text-3xl mb-3; }
-h3 { @apply text-2xl mb-2; }
-h4 { @apply text-xl mb-2; }
-h5 { @apply text-lg mb-1; }
-h6 { @apply text-base mb-1; }
-
-p {
-  @apply text-gray-800 dark:text-gray-200 leading-relaxed;
-}
-
-li {
-  @apply text-gray-800 dark:text-gray-200 leading-relaxed;
-}
-
-@keyframes gradient-animation {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-.gradient-text {
-  background: linear-gradient(to right, #3b2afb, purple);
-  background-size: 200% 200%;
-  animation: gradient-animation 5s ease-in-out infinite;
+/* Rainbow Text Effect */
+.text-rainbow {
+  background-image: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #96c93d, #ff6b6b);
+  background-size: 200% auto;
   -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text; /* Standard syntax for modern browsers */
+  background-clip: text;
+  color: transparent !important;
+  animation: gradientFlow 5s linear infinite;
+}
+
+/* Text Glow Effect */
+.text-glow {
+  text-shadow: 0 0 5px rgba(99, 102, 241, 0.3);
+  transition: text-shadow 0.3s ease;
+}
+
+.text-glow:hover {
+  text-shadow: 0 0 10px rgba(99, 102, 241, 0.7);
+}
+
+/* Sleek Code Block Styling */
+.code-block {
+  @apply relative rounded-xl overflow-hidden my-8;
+  background: linear-gradient(135deg, #1e293b, #2d3748);
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 15px;
+  line-height: 1.6;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.code-block-header {
+  @apply flex items-center justify-between px-5 py-3 text-sm font-medium;
+  background: rgba(15, 23, 42, 0.9);
+  color: #a5b4fc;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.code-block-header .language-label {
+  @apply py-1 px-3 rounded-full text-xs uppercase font-bold;
+  background: linear-gradient(90deg, #ff6b6b, #4ecdc4);
+  color: white;
+}
+
+.copy-button {
+  @apply p-2 rounded-lg text-sm transition-all duration-300;
+  background: rgba(255, 255, 255, 0.05);
+  color: #a5b4fc;
+}
+
+.copy-button:hover {
+  background: rgba(255, 107, 107, 0.2);
+  color: #fff;
+  box-shadow: 0 0 10px rgba(255, 107, 107, 0.5);
+}
+
+/* Card Hover Effects */
+.suggestion-card {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+}
+
+.suggestion-card:hover {
+  transform: translateY(-5px) scale(1.01);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Input Focus Effects */
+textarea:focus {
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
+  transition: box-shadow 0.3s ease;
+}
+
+/* Refined Syntax Highlighting */
+.hljs-keyword { color: #60a5fa; }
+.hljs-string { color: #f9e2af; }
+.hljs-comment { color: #6ee7b7; font-style: italic; }
+.hljs-number { color: #f9a8d4; }
+.hljs-function { color: #f472b6; }
+.hljs-built_in { color: #4ade80; }
+.hljs-tag { color: #60a5fa; }
+.hljs-attr { color: #f9e2af; }
+
+/* Inline Code with Glow */
+.inline-code {
+  @apply bg-gray-100/80 dark:bg-gray-800/80 text-indigo-500 dark:text-indigo-300 px-2.5 py-1 rounded-lg font-mono text-sm border border-gray-200/50 dark:border-gray-700/50;
+  box-shadow: 0 0 5px rgba(99, 102, 241, 0.3);
+}
+
+/* Typography with Depth */
+h1, h2, h3, h4, h5, h6 {
+  @apply font-bold text-gray-900 dark:text-white leading-tight tracking-tight;
+}
+
+h1 { @apply text-4xl lg:text-5xl mb-8 mt-10 drop-shadow-md; }
+h2 { @apply text-3xl lg:text-4xl mb-6 mt-8 drop-shadow-sm; }
+h3 { @apply text-2xl lg:text-3xl mb-5 mt-7; }
+
+/* Enhanced Lists with Gradients */
+ul > li::before { content: "◆"; @apply text-transparent bg-gradient-to-r from-red-500 to-indigo-500 bg-clip-text; }
+ol > li::before { @apply text-transparent bg-gradient-to-r from-red-500 to-indigo-500 bg-clip-text; }
+
+/* Blockquotes with Flair */
+blockquote {
+  @apply pl-6 py-3 my-6 rounded-r-lg italic;
+  border-left: 4px solid;
+  border-image: linear-gradient(to bottom, #ff6b6b, #4ecdc4) 1;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(4px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+/* Tables with Modern Touch */
+table {
+  @apply w-full my-8 text-left border-collapse rounded-lg overflow-hidden shadow-lg;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+table th {
+  @apply px-6 py-4 bg-gradient-to-r from-indigo-500 to-red-500 text-white font-bold;
+}
+
+table td {
+  @apply px-6 py-4 border-t border-gray-100/50 dark:border-gray-700/50 text-gray-700 dark:text-gray-300;
+}
+
+/* Links with Hover Effects */
+a {
+  @apply text-indigo-500 dark:text-indigo-400 transition-all duration-300 hover:text-indigo-700 dark:hover:text-indigo-300 hover:underline hover:drop-shadow-md;
 }

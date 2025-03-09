@@ -1,5 +1,6 @@
-import React, { createContext, useState, useCallback } from "react";
+import React, { createContext, useState, useCallback, useEffect } from "react";
 import run from "../config/gemini";
+import hljs from "highlight.js"; // Import highlight.js for syntax highlighting
 
 interface ContextType {
   input?: string;
@@ -45,7 +46,7 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({ child
   });
 
   // Effect to apply dark mode to body
-  React.useEffect(() => {
+  useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add('dark');
     } else {
@@ -54,140 +55,266 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({ child
     localStorage.setItem('darkMode', JSON.stringify(darkMode));
   }, [darkMode]);
   
-  const formatCodeBlock = (language: string, code: string) => {
-    language = language.trim();
+  // Effect to load highlight.js styles
+  useEffect(() => {
+    // Load highlight.js styles dynamically based on dark mode
+    const linkId = 'hljs-theme-link';
+    let link = document.getElementById(linkId) as HTMLLinkElement;
     
-    // Apply syntax highlighting based on language
-    let highlightedCode = code;
-    
-    if (language) {
-      // Simple syntax highlighting for common languages
-      if (['javascript', 'typescript', 'js', 'ts'].includes(language.toLowerCase())) {
-        highlightedCode = code
-          // Keywords
-          .replace(/\b(const|let|var|function|return|if|else|for|while|class|import|export|from|as|async|await|try|catch|throw|new|this)\b/g, 
-                   '<span class="keyword">$1</span>')
-          // Strings
-          .replace(/(['"`])(.*?)\1/g, '<span class="string">$1$2$1</span>')
-          // Comments
-          .replace(/\/\/(.*)/g, '<span class="comment">//$1</span>')
-          // Numbers
-          .replace(/\b(\d+)\b/g, '<span class="number">$1</span>');
-      } 
-      else if (['python', 'py'].includes(language.toLowerCase())) {
-        highlightedCode = code
-          // Keywords
-          .replace(/\b(def|class|import|from|as|return|if|elif|else|for|while|in|try|except|raise|with|assert|None|True|False)\b/g, 
-                   '<span class="keyword">$1</span>')
-          // Strings
-          .replace(/(['"])(.*?)\1/g, '<span class="string">$1$2$1</span>')
-          // Comments
-          .replace(/#(.*)/g, '<span class="comment">#$1</span>')
-          // Numbers
-          .replace(/\b(\d+)\b/g, '<span class="number">$1</span>');
-      }
+    if (!link) {
+      link = document.createElement('link');
+      link.id = linkId;
+      link.rel = 'stylesheet';
+      document.head.appendChild(link);
     }
     
-    // Return code block with proper classes
-    return `<div class="code-block" data-language="${language || 'code'}"><code>${highlightedCode}</code></div>`;
+    // Choose a theme based on dark mode
+    link.href = darkMode 
+      ? 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css'
+      : 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-light.min.css';
+  }, [darkMode]);
+  
+  // Enhanced code block formatting with syntax highlighting
+  const formatCodeBlock = (language: string, code: string) => {
+    // Remove extra indentation that might be present in the code
+    const lines = code.split('\n');
+    const minIndent = lines
+      .filter(line => line.trim().length > 0)
+      .reduce((min, line) => {
+        const indent = line.match(/^\s*/)?.[0].length || 0;
+        return Math.min(min, indent);
+      }, Infinity) || 0;
+    
+    const normalizedCode = lines
+      .map(line => line.substring(minIndent))
+      .join('\n');
+    
+    language = language.trim().toLowerCase();
+    
+    // Apply syntax highlighting using highlight.js
+    let highlightedCode;
+    try {
+      // Auto-detect language if not specified
+      if (language && hljs.getLanguage(language)) {
+        highlightedCode = hljs.highlight(normalizedCode, { language }).value;
+      } else {
+        highlightedCode = hljs.highlightAuto(normalizedCode).value;
+        // Get the detected language
+        language = hljs.highlightAuto(normalizedCode).language || 'text';
+      }
+    } catch (error) {
+      // Fallback to escaped code if highlighting fails
+      console.error("Syntax highlighting error:", error);
+      highlightedCode = normalizedCode
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+    
+    // Return code block with proper classes and enhanced styling
+    return `
+      <pre class="code-block rounded-md overflow-x-auto my-4" data-language="${language || 'text'}">
+        <div class="flex items-center justify-between px-4 py-2 bg-gray-200 dark:bg-gray-800 border-b border-gray-300 dark:border-gray-700">
+          <span class="text-sm font-mono text-gray-700 dark:text-gray-300">${language || 'text'}</span>
+          <button class="copy-code-btn text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors" 
+            onclick="navigator.clipboard.writeText(this.parentElement.nextElementSibling.textContent)">
+            Copy
+          </button>
+        </div>
+        <code class="hljs px-4 py-3 block">${highlightedCode}</code>
+      </pre>
+    `;
   };
 
+  // Improved markdown code block detection
   const formatMarkdownCodeBlocks = (text: string) => {
-    // Handle triple backtick code blocks
-    return text.replace(/```(\w*)\n([\s\S]*?)\n```/g, (_, language, code) => {
+    // Fix for triple backtick code blocks
+    // This pattern captures the language (if any) and the code content
+    return text.replace(/```([\w-]*)\n([\s\S]*?)\n```/g, (_, language, code) => {
       return formatCodeBlock(language, code);
     });
   };
 
+  // Completely rewritten markdown formatter
   const formatMarkdown = (text: string) => {
     if (!text) return "";
   
-    let formattedText = text;
+    // Store code blocks temporarily to prevent other formatting from affecting them
+    const codeBlocks: string[] = [];
+    let processedText = text;
+    
+    // 1. Extract and preserve code blocks first
+    processedText = processedText.replace(/```([\w-]*)\n([\s\S]*?)\n```/g, (match) => {
+      const placeholder = `__CODE_BLOCK_${codeBlocks.length}__`;
+      codeBlocks.push(match);
+      return placeholder;
+    });
+    
+    // 2. Extract and preserve inline code
+    const inlineCodeBlocks: string[] = [];
+    processedText = processedText.replace(/`([^`]+)`/g, (match) => {
+      const placeholder = `__INLINE_CODE_${inlineCodeBlocks.length}__`;
+      inlineCodeBlocks.push(match);
+      return placeholder;
+    });
   
-    // 1. Handle code blocks first (preserve them from other transformations)
-    formattedText = formatMarkdownCodeBlocks(formattedText);
-  
-    // 2. Handle headers
-    formattedText = formattedText.replace(/^(#{1,6})\s+(.+)$/gm, (_, hashes, content) => {
+    // 3. Handle headers - must be at start of line
+    processedText = processedText.replace(/^(#{1,6})\s+(.+)$/gm, (_, hashes, content) => {
       const level = hashes.length;
-      return `<h${level} class="mt-6 mb-4 font-semibold">${content}</h${level}>`;
+      const size = 7 - level; // h1 is largest, h6 is smallest
+      return `<h${level} class="text-${size}xl font-semibold mt-6 mb-4">${content}</h${level}>`;
     });
   
-    // 3. Handle bold text
-    formattedText = formattedText.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    // 4. Handle bold text
+    processedText = processedText.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-bold">$1</strong>');
   
-    // 4. Handle italic text
-    formattedText = formattedText.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+    // 5. Handle italic text
+    processedText = processedText.replace(/\*([^*]+)\*/g, '<em class="italic">$1</em>');
   
-    // 5. Handle inline code
-    formattedText = formattedText.replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>');
+    // 6. Handle paragraphs and line breaks better
+    processedText = processedText
+      .split('\n\n')
+      .map(paragraph => {
+        // Skip paragraphs that are placeholders or already HTML
+        if (
+          paragraph.includes('__CODE_BLOCK_') || 
+          paragraph.includes('__INLINE_CODE_') || 
+          paragraph.startsWith('<')
+        ) {
+          return paragraph;
+        }
+        
+        // For normal text paragraphs
+        return `<p class="my-4 leading-relaxed break-words">${paragraph}</p>`;
+      })
+      .join('\n');
   
-    // 6. Handle unordered lists
-    let inList = false;
-    formattedText = formattedText.replace(/^(\s*)-\s+(.+)$/gm, (_, content) => {
-      if (!inList) {
-        inList = true;
-        return `<ul class="my-4 pl-5">\n<li class="my-2">${content}</li>`;
-      }
-      return `<li class="my-2">${content}</li>`;
+    // 7. Restore code blocks with proper width control
+    processedText = processedText.replace(/__CODE_BLOCK_(\d+)__/g, (_match, index) => {
+      const original = codeBlocks[parseInt(index)];
+      const formatted = formatMarkdownCodeBlocks(original);
+      return `<div class="overflow-x-auto w-full">${formatted}</div>`;
     });
-    if (inList) {
-      formattedText += '\n</ul>';
-      inList = false;
-    }
-  
-    // 7. Handle ordered lists
-    let inOrderedList = false;
-    formattedText = formattedText.replace(/^(\s*)(\d+)\.\s+(.+)$/gm, (_,content) => {
-      if (!inOrderedList) {
-        inOrderedList = true;
-        return `<ol class="my-4 pl-5">\n<li class="my-2">${content}</li>`;
-      }
-      return `<li class="my-2">${content}</li>`;
+    
+    // 8. Restore inline code
+    processedText = processedText.replace(/__INLINE_CODE_(\d+)__/g, (_match, index) => {
+      const original = inlineCodeBlocks[parseInt(index)];
+      return `<code class="bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded font-mono text-sm whitespace-normal break-all">${original.slice(1, -1)}</code>`;
     });
-    if (inOrderedList) {
-      formattedText += '\n</ol>';
-      inOrderedList = false;
-    }
   
-    // 8. Handle paragraphs - preserve existing HTML tags
-    const paragraphs = formattedText.split('\n\n');
-    formattedText = paragraphs.map(para => {
-      para = para.trim();
-      if (para && !para.startsWith('<')) {
-        return `<p class="my-4 leading-relaxed">${para}</p>`;
-      }
-      return para;
-    }).join('\n');
-  
-    return formattedText;
+    return processedText;
   };
 
+  // Fixed delayPara function to avoid displaying unwanted text at the start
   const delayPara = useCallback((text: string) => {
     if (!text) return;
     
     setAnimationInProgress(true);
-    // Split by HTML tags to preserve them during animation
-    const parts = text.split(/(<[^>]+>)/g);
-    let currentIndex = 0;
-    let buffer = '';
-  
-    const animatePart = () => {
-      if (currentIndex < parts.length) {
-        const part = parts[currentIndex];
-        buffer += part;
-        currentIndex++;
-        
-        setresultData(buffer);
-        
-        if (currentIndex < parts.length) {
-          setTimeout(animatePart, 15); // Slightly faster animation
-        } else {
-          setAnimationInProgress(false);
+    
+    // First, process the entire content at once to get properly formatted HTML
+    const processedContent = text.trim();
+    
+    // Then create a temporary DOM element to properly parse the HTML
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = processedContent;
+    
+    // Extract all text nodes and HTML tags in proper sequence
+    const nodes: Node[] = [];
+    const walkNodes = (node: Node) => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        if (node.textContent && node.textContent.trim()) {
+          nodes.push(node);
         }
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        // For element nodes, push the opening tag
+        const element = node as Element;
+        const clone = element.cloneNode(false) as Element;
+        clone.innerHTML = '';
+        nodes.push(clone);
+        
+        // Process all child nodes
+        Array.from(node.childNodes).forEach(walkNodes);
+        
+        // Push a closing marker node (we'll reconstruct the closing tag later)
+        const closingMarker = document.createTextNode(`__CLOSING_TAG_${element.tagName.toLowerCase()}__`);
+        nodes.push(closingMarker);
       }
     };
-  
+    
+    Array.from(tempDiv.childNodes).forEach(walkNodes);
+    
+    // Now animate through these nodes sequentially
+    let currentIndex = 0;
+    let buffer = '';
+    let openTags: string[] = [];
+    
+    const animatePart = () => {
+      if (currentIndex < nodes.length) {
+        const node = nodes[currentIndex];
+        
+        if (node.nodeType === Node.TEXT_NODE) {
+          const text = node.textContent || '';
+          if (text.startsWith('__CLOSING_TAG_')) {
+            // This is our marker for a closing tag
+            const tagName = text.replace('__CLOSING_TAG_', '').replace('__', '');
+            buffer += `</${tagName}>`;
+            
+            // Remove the last open tag
+            if (openTags.length > 0) {
+              openTags.pop();
+            }
+          } else {
+            // Regular text node, animate character by character for text
+            buffer += text;
+          }
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+          // For element nodes, add the entire opening tag at once
+          const element = node as Element;
+          const tagName = element.tagName.toLowerCase();
+          
+          // Create an opening tag with all attributes
+          let openingTag = `<${tagName}`;
+          for (let i = 0; i < element.attributes.length; i++) {
+            const attr = element.attributes[i];
+            openingTag += ` ${attr.name}="${attr.value}"`;
+          }
+          openingTag += '>';
+          
+          buffer += openingTag;
+          
+          // Keep track of open tags for proper nesting
+          openTags.push(tagName);
+          
+          // For self-closing tags, we need to make sure we don't expect a closing tag
+          if (tagName === 'br' || tagName === 'hr' || tagName === 'img' || tagName === 'input') {
+            openTags.pop();
+          }
+        }
+        
+        setresultData(buffer);
+        currentIndex++;
+        
+        // Continue animation
+        setTimeout(animatePart, 15);
+      } else {
+        // Animation complete
+        setAnimationInProgress(false);
+        
+        // Apply syntax highlighting to code blocks
+        setTimeout(() => {
+          if (typeof hljs !== 'undefined') {
+            document.querySelectorAll('pre code').forEach(block => {
+              hljs.highlightElement(block as HTMLElement);
+            });
+          }
+        }, 100);
+      }
+    };
+    
+    // Start the animation
+    setresultData('');
     animatePart();
   }, []);
 

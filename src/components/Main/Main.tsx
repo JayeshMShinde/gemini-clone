@@ -260,15 +260,12 @@ const InitialView: React.FC = () => {
 };
 
 const WelcomeMessage: React.FC = () => {
-  // Create an array of letters for the wave animation
-  // const letters = "Gemini".split("");
-
   return (
-    <div className="mb-16 text-center">
-      <h1 className="text-5xl md:text-6xl font-bold text-gray-800 dark:text-gray-100 mb-4">
-        <span className="gradient-text">Ram Ram Madli</span>
+    <div className="welcome-header">
+      <h1 className="welcome-title">
+        <span className="p-2 gradient-text">Ram Ram, AI bhakts!</span>
       </h1>
-      <p className="text-4xl md:text-5xl font-semibold text-gray-600 dark:text-gray-300">
+      <p className="welcome-subtitle">
         How can I help you today?
       </p>
     </div>
@@ -398,6 +395,7 @@ const GeminiResponse: React.FC<{ loading: boolean; resultData: string }> = ({
   const { isDarkMode } = useContext(ThemeContext);
   const [displayedText, setDisplayedText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const responseRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!loading && resultData && !isTyping) {
@@ -422,15 +420,15 @@ const GeminiResponse: React.FC<{ loading: boolean; resultData: string }> = ({
   return (
     <div
       className={`
-          flex items-start gap-5 p-4 rounded-2xl animate-text-fade
-          ${isDarkMode ? "bg-blue-900/20" : "bg-blue-50"}
-        `}
+        flex items-start gap-5 p-4 rounded-2xl animate-text-fade
+        ${isDarkMode ? "bg-blue-900/20" : "bg-blue-50"}
+      `}
     >
-      <div className="w-10 h-10 rounded-full shadow-sm overflow-hidden text-neon">
+      <div className="w-10 h-10 flex-shrink-0 rounded-full shadow-sm overflow-hidden text-neon">
         <GeminiIcon isDarkMode={isDarkMode} />
       </div>
       {loading ? (
-        <div className="flex-1 flex justify-center py-8">
+        <div className="overflow-hidden flex-1 flex justify-center py-8">
           <l-grid
             size="100"
             speed="2.8"
@@ -439,7 +437,8 @@ const GeminiResponse: React.FC<{ loading: boolean; resultData: string }> = ({
         </div>
       ) : (
         <div
-          className={`flex-1 prose prose-blue dark:prose-invert max-w-none leading-relaxed pt-1 ${
+          ref={responseRef}
+          className={`flex-1 prose prose-blue dark:prose-invert max-w-none overflow-x-auto leading-relaxed pt-1 ${
             isTyping ? "enhanced-typing" : ""
           }`}
           dangerouslySetInnerHTML={{
