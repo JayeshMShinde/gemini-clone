@@ -8,7 +8,7 @@
 
 /* Global Styles */
 * {
-  font-family: "Rubik", sans-serif;
+  font-family: "Roboto Condensed", sans-serif;
   @apply antialiased;
 }
 
@@ -51,7 +51,7 @@
 /* Enhanced Vibrant Gradient Text with Directional Movement */
 .gradient-text {
   /* Change to handwritten font with fallback */
-  font-family: "Dancing Script", cursive;
+  font-family: "Roboto Condensed", cursive;
   
   /* Keep the gradient animation */
   background: linear-gradient(90deg, #ff6b6b, #5463ec, #ee5bc0, #fdb43d, #ff6b6b);

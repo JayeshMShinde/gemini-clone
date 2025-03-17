@@ -263,7 +263,7 @@ const WelcomeMessage: React.FC = () => {
   return (
     <div className="welcome-header">
       <h1 className="welcome-title">
-        <span className="p-2 gradient-text">Ram Ram, AI bhakts!</span>
+        <span className="p-2 gradient-text">G-Clone</span>
       </h1>
       <p className="welcome-subtitle">
         How can I help you today?
