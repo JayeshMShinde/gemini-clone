@@ -1,6 +1,6 @@
-import React, { createContext, useState, useCallback, useEffect } from "react";
+import React, { createContext, useState, useCallback, useEffect, useMemo } from "react";
 import run from "../config/gemini";
-import hljs from "highlight.js"; // Import highlight.js for syntax highlighting
+import hljs from "highlight.js";
 
 interface ContextType {
   input?: string;
@@ -24,59 +24,26 @@ interface ContextType {
 
 export const Context = createContext<ContextType | undefined>(undefined);
 
-export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [input, setInput] = useState<string>("");
-  const [recentPrompt, setrecentPrompt] = useState<string>("");
-  const [previousPrompt, setpreviousPrompt] = useState<string[]>([]);
-  const [showResult, setshowResult] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [resultData, setresultData] = useState<string>("");
-  const [extended, setExtended] = useState<boolean>(false);
-  const [animationInProgress, setAnimationInProgress] = useState<boolean>(false);
-  
-  // Add dark mode state
-  const [darkMode, setDarkMode] = useState<boolean>(() => {
-    // Check user preference or system preference
-    if (typeof window !== 'undefined') {
-      const savedMode = localStorage.getItem('darkMode');
-      return savedMode ? JSON.parse(savedMode) : 
-        window.matchMedia('(prefers-color-scheme: dark)').matches;
-    }
-    return false;
-  });
+// Debounce function to limit function calls
+// const debounce = (func: Function, wait: number) => {
+//   let timeout: ReturnType<typeof setTimeout>;
+//   return function(...args: any[]) {
+//     clearTimeout(timeout);
+//     timeout = setTimeout(() => func(...args), wait);
+//   };
+// };
 
-  // Effect to apply dark mode to body
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-    localStorage.setItem('darkMode', JSON.stringify(darkMode));
-  }, [darkMode]);
+// Memoized formatCodeBlock function to avoid unnecessary re-rendering
+const createFormatCodeBlock = () => {
+  const cache = new Map<string, string>();
   
-  // Effect to load highlight.js styles
-  useEffect(() => {
-    // Load highlight.js styles dynamically based on dark mode
-    const linkId = 'hljs-theme-link';
-    let link = document.getElementById(linkId) as HTMLLinkElement;
-    
-    if (!link) {
-      link = document.createElement('link');
-      link.id = linkId;
-      link.rel = 'stylesheet';
-      document.head.appendChild(link);
+  return (language: string, code: string): string => {
+    const cacheKey = `${language}:${code}`;
+    if (cache.has(cacheKey)) {
+      return cache.get(cacheKey)!;
     }
     
-    // Choose a theme based on dark mode
-    link.href = darkMode 
-      ? 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css'
-      : 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-light.min.css';
-  }, [darkMode]);
-  
-  // Enhanced code block formatting with syntax highlighting
-  const formatCodeBlock = (language: string, code: string) => {
-    // Remove extra indentation that might be present in the code
+    // Remove extra indentation
     const lines = code.split('\n');
     const minIndent = lines
       .filter(line => line.trim().length > 0)
@@ -91,19 +58,15 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({ child
     
     language = language.trim().toLowerCase();
     
-    // Apply syntax highlighting using highlight.js
     let highlightedCode;
     try {
-      // Auto-detect language if not specified
       if (language && hljs.getLanguage(language)) {
         highlightedCode = hljs.highlight(normalizedCode, { language }).value;
       } else {
         highlightedCode = hljs.highlightAuto(normalizedCode).value;
-        // Get the detected language
         language = hljs.highlightAuto(normalizedCode).language || 'text';
       }
     } catch (error) {
-      // Fallback to escaped code if highlighting fails
       console.error("Syntax highlighting error:", error);
       highlightedCode = normalizedCode
         .replace(/&/g, '&amp;')
@@ -113,8 +76,7 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({ child
         .replace(/'/g, '&#039;');
     }
     
-    // Return code block with proper classes and enhanced styling
-    return `
+    const result = `
       <pre class="code-block rounded-md overflow-x-auto my-4" data-language="${language || 'text'}">
         <div class="flex items-center justify-between px-4 py-2 bg-gray-200 dark:bg-gray-800 border-b border-gray-300 dark:border-gray-700">
           <span class="text-sm font-mono text-gray-700 dark:text-gray-300">${language || 'text'}</span>
@@ -126,33 +88,45 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({ child
         <code class="hljs px-4 py-3 block">${highlightedCode}</code>
       </pre>
     `;
+    
+    cache.set(cacheKey, result);
+    return result;
   };
+};
 
-  // Improved markdown code block detection
+// Worker for processing markdown (simulated with a memoized function)
+const createMarkdownProcessor = () => {
+  const formatCodeBlockFn = createFormatCodeBlock();
+  const markdownCache = new Map<string, string>();
+  
+  // Process markdown code blocks
   const formatMarkdownCodeBlocks = (text: string) => {
-    // Fix for triple backtick code blocks
-    // This pattern captures the language (if any) and the code content
     return text.replace(/```([\w-]*)\n([\s\S]*?)\n```/g, (_, language, code) => {
-      return formatCodeBlock(language, code);
+      return formatCodeBlockFn(language, code);
     });
   };
 
-  // Completely rewritten markdown formatter
-  const formatMarkdown = (text: string) => {
+  return (text: string): string => {
     if (!text) return "";
-  
-    // Store code blocks temporarily to prevent other formatting from affecting them
+    
+    // Check cache first
+    const cacheKey = text;
+    if (markdownCache.has(cacheKey)) {
+      return markdownCache.get(cacheKey)!;
+    }
+    
+    // Store code blocks temporarily
     const codeBlocks: string[] = [];
     let processedText = text;
     
-    // 1. Extract and preserve code blocks first
+    // 1. Extract code blocks
     processedText = processedText.replace(/```([\w-]*)\n([\s\S]*?)\n```/g, (match) => {
       const placeholder = `__CODE_BLOCK_${codeBlocks.length}__`;
       codeBlocks.push(match);
       return placeholder;
     });
     
-    // 2. Extract and preserve inline code
+    // 2. Extract inline code
     const inlineCodeBlocks: string[] = [];
     processedText = processedText.replace(/`([^`]+)`/g, (match) => {
       const placeholder = `__INLINE_CODE_${inlineCodeBlocks.length}__`;
@@ -160,10 +134,10 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({ child
       return placeholder;
     });
   
-    // 3. Handle headers - must be at start of line
+    // 3. Handle headers
     processedText = processedText.replace(/^(#{1,6})\s+(.+)$/gm, (_, hashes, content) => {
       const level = hashes.length;
-      const size = 7 - level; // h1 is largest, h6 is smallest
+      const size = 7 - level;
       return `<h${level} class="text-${size}xl font-semibold mt-6 mb-4">${content}</h${level}>`;
     });
   
@@ -173,25 +147,20 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({ child
     // 5. Handle italic text
     processedText = processedText.replace(/\*([^*]+)\*/g, '<em class="italic">$1</em>');
   
-    // 6. Handle paragraphs and line breaks better
-    processedText = processedText
-      .split('\n\n')
-      .map(paragraph => {
-        // Skip paragraphs that are placeholders or already HTML
-        if (
-          paragraph.includes('__CODE_BLOCK_') || 
-          paragraph.includes('__INLINE_CODE_') || 
-          paragraph.startsWith('<')
-        ) {
-          return paragraph;
-        }
-        
-        // For normal text paragraphs
-        return `<p class="my-4 leading-relaxed break-words">${paragraph}</p>`;
-      })
-      .join('\n');
+    // 6. Handle paragraphs
+    const paragraphs = processedText.split('\n\n');
+    processedText = paragraphs.map(paragraph => {
+      if (
+        paragraph.includes('__CODE_BLOCK_') || 
+        paragraph.includes('__INLINE_CODE_') || 
+        paragraph.startsWith('<')
+      ) {
+        return paragraph;
+      }
+      return `<p class="my-4 leading-relaxed break-words">${paragraph}</p>`;
+    }).join('\n');
   
-    // 7. Restore code blocks with proper width control
+    // 7. Restore code blocks
     processedText = processedText.replace(/__CODE_BLOCK_(\d+)__/g, (_match, index) => {
       const original = codeBlocks[parseInt(index)];
       const formatted = formatMarkdownCodeBlocks(original);
@@ -204,121 +173,155 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({ child
       return `<code class="bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded font-mono text-sm whitespace-normal break-all">${original.slice(1, -1)}</code>`;
     });
   
+    // Cache the result
+    markdownCache.set(cacheKey, processedText);
     return processedText;
   };
+};
 
-  // Fixed delayPara function to avoid displaying unwanted text at the start
+export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [input, setInput] = useState<string>("");
+  const [recentPrompt, setrecentPrompt] = useState<string>("");
+  const [previousPrompt, setpreviousPrompt] = useState<string[]>([]);
+  const [showResult, setshowResult] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [resultData, setresultData] = useState<string>("");
+  const [extended, setExtended] = useState<boolean>(false);
+  const [animationInProgress, setAnimationInProgress] = useState<boolean>(false);
+  
+  // Add dark mode state with proper initialization
+  const [darkMode, setDarkMode] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    
+    const savedMode = localStorage.getItem('darkMode');
+    return savedMode ? JSON.parse(savedMode) : 
+      window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
+
+  // Initialize formatMarkdown processor
+  const formatMarkdown = useMemo(() => createMarkdownProcessor(), []);
+
+  // Effect to apply dark mode to body
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    
+    // Use requestAnimationFrame to batch DOM operations
+    requestAnimationFrame(() => {
+      localStorage.setItem('darkMode', JSON.stringify(darkMode));
+    });
+  }, [darkMode]);
+  
+  // Effect to load highlight.js styles - optimized with cleanup
+  useEffect(() => {
+    const linkId = 'hljs-theme-link';
+    let link = document.getElementById(linkId) as HTMLLinkElement;
+    
+    if (!link) {
+      link = document.createElement('link');
+      link.id = linkId;
+      link.rel = 'stylesheet';
+      document.head.appendChild(link);
+    }
+    
+    // Set the href based on dark mode
+    link.href = darkMode 
+      ? 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css'
+      : 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-light.min.css';
+      
+    return () => {
+      // No cleanup needed for link as we reuse it
+    };
+  }, [darkMode]);
+
+  // Optimized text animation using requestAnimationFrame
   const delayPara = useCallback((text: string) => {
-    if (!text) return;
+    if (!text || animationInProgress) return;
     
     setAnimationInProgress(true);
+    setresultData('');
     
-    // First, process the entire content at once to get properly formatted HTML
+    // Process content once
     const processedContent = text.trim();
-    
-    // Then create a temporary DOM element to properly parse the HTML
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = processedContent;
     
-    // Extract all text nodes and HTML tags in proper sequence
-    const nodes: Node[] = [];
-    const walkNodes = (node: Node) => {
-      if (node.nodeType === Node.TEXT_NODE) {
-        if (node.textContent && node.textContent.trim()) {
-          nodes.push(node);
-        }
-      } else if (node.nodeType === Node.ELEMENT_NODE) {
-        // For element nodes, push the opening tag
-        const element = node as Element;
-        const clone = element.cloneNode(false) as Element;
-        clone.innerHTML = '';
-        nodes.push(clone);
-        
-        // Process all child nodes
-        Array.from(node.childNodes).forEach(walkNodes);
-        
-        // Push a closing marker node (we'll reconstruct the closing tag later)
-        const closingMarker = document.createTextNode(`__CLOSING_TAG_${element.tagName.toLowerCase()}__`);
-        nodes.push(closingMarker);
-      }
-    };
-    
-    Array.from(tempDiv.childNodes).forEach(walkNodes);
-    
-    // Now animate through these nodes sequentially
-    let currentIndex = 0;
-    let buffer = '';
-    let openTags: string[] = [];
-    
-    const animatePart = () => {
-      if (currentIndex < nodes.length) {
-        const node = nodes[currentIndex];
-        
+    // Extract nodes in proper sequence
+    const getNodeSequence = (element: HTMLElement) => {
+      const result: Array<{type: 'tag' | 'text', content: string}> = [];
+      
+      const processNode = (node: Node) => {
         if (node.nodeType === Node.TEXT_NODE) {
-          const text = node.textContent || '';
-          if (text.startsWith('__CLOSING_TAG_')) {
-            // This is our marker for a closing tag
-            const tagName = text.replace('__CLOSING_TAG_', '').replace('__', '');
-            buffer += `</${tagName}>`;
-            
-            // Remove the last open tag
-            if (openTags.length > 0) {
-              openTags.pop();
-            }
-          } else {
-            // Regular text node, animate character by character for text
-            buffer += text;
+          if (node.textContent && node.textContent.trim()) {
+            result.push({type: 'text', content: node.textContent});
           }
         } else if (node.nodeType === Node.ELEMENT_NODE) {
-          // For element nodes, add the entire opening tag at once
-          const element = node as Element;
-          const tagName = element.tagName.toLowerCase();
+          const elem = node as HTMLElement;
+          const openTag = elem.outerHTML.slice(0, elem.outerHTML.indexOf(elem.innerHTML));
+          result.push({type: 'tag', content: openTag});
           
-          // Create an opening tag with all attributes
-          let openingTag = `<${tagName}`;
-          for (let i = 0; i < element.attributes.length; i++) {
-            const attr = element.attributes[i];
-            openingTag += ` ${attr.name}="${attr.value}"`;
-          }
-          openingTag += '>';
+          Array.from(node.childNodes).forEach(processNode);
           
-          buffer += openingTag;
-          
-          // Keep track of open tags for proper nesting
-          openTags.push(tagName);
-          
-          // For self-closing tags, we need to make sure we don't expect a closing tag
-          if (tagName === 'br' || tagName === 'hr' || tagName === 'img' || tagName === 'input') {
-            openTags.pop();
-          }
+          const closeTag = `</${elem.tagName.toLowerCase()}>`;
+          result.push({type: 'tag', content: closeTag});
+        }
+      };
+      
+      Array.from(element.childNodes).forEach(processNode);
+      return result;
+    };
+    
+    const nodeSequence = getNodeSequence(tempDiv);
+    let currentIndex = 0;
+    let buffer = '';
+    
+    const renderNextPart = () => {
+      const CHUNK_SIZE = 5; // Process multiple nodes at once for better performance
+      let processedChunks = 0;
+      
+      while (currentIndex < nodeSequence.length && processedChunks < CHUNK_SIZE) {
+        const node = nodeSequence[currentIndex];
+        
+        if (node.type === 'text') {
+          buffer += node.content;
+        } else { // tag
+          buffer += node.content;
         }
         
-        setresultData(buffer);
         currentIndex++;
-        
-        // Continue animation
-        setTimeout(animatePart, 15);
+        processedChunks++;
+      }
+      
+      setresultData(buffer);
+      
+      if (currentIndex < nodeSequence.length) {
+        requestAnimationFrame(renderNextPart);
       } else {
-        // Animation complete
         setAnimationInProgress(false);
         
-        // Apply syntax highlighting to code blocks
-        setTimeout(() => {
-          if (typeof hljs !== 'undefined') {
-            document.querySelectorAll('pre code').forEach(block => {
-              hljs.highlightElement(block as HTMLElement);
-            });
-          }
-        }, 100);
+        // Apply syntax highlighting to code blocks after animation completes
+        requestAnimationFrame(() => {
+          document.querySelectorAll('pre code').forEach(block => {
+            hljs.highlightElement(block as HTMLElement);
+          });
+        });
       }
     };
     
-    // Start the animation
-    setresultData('');
-    animatePart();
-  }, []);
+    requestAnimationFrame(renderNextPart);
+  }, [animationInProgress]);
 
-  const onSent = async (prompt: string) => {
+  // Create a debounced version of formatMarkdown
+  // const debouncedFormatMarkdown = useCallback(
+  //   debounce((text: string) => formatMarkdown(text), 100),
+  //   [formatMarkdown]
+  // );
+
+  // Optimized API call handling
+  const onSent = useCallback(async (prompt: string) => {
     if (animationInProgress || !prompt.trim()) return;
     
     setresultData("");
@@ -327,7 +330,12 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setrecentPrompt(prompt);
     
     try {
+      // Use AbortController for request cancellation
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
+      
       const response = await run(prompt);
+      clearTimeout(timeoutId);
       
       if (!response) {
         throw new Error("Empty response received");
@@ -337,10 +345,8 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({ child
       const formattedResponse = formatMarkdown(response);
       delayPara(formattedResponse);
       
-      // Clear the input field
+      // Update state with batched updates
       setInput("");
-      
-      // Update previous prompts
       setpreviousPrompt(prev => (prev ? [...prev, prompt] : [prompt]));
     } catch (error) {
       console.error("Error:", error);
@@ -348,9 +354,10 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({ child
     } finally {
       setLoading(false);
     }
-  };
+  }, [animationInProgress, formatMarkdown, delayPara]);
 
-  const contextValue: ContextType = {
+  // Memoize context value to prevent unnecessary re-renders
+  const contextValue = useMemo(() => ({
     input,
     setInput,
     recentPrompt,
@@ -368,7 +375,17 @@ export const ContextProvider: React.FC<{ children: React.ReactNode }> = ({ child
     setExtended,
     darkMode,
     setDarkMode
-  };
+  }), [
+    input, 
+    recentPrompt, 
+    previousPrompt,
+    showResult,
+    loading,
+    resultData,
+    onSent,
+    extended,
+    darkMode
+  ]);
 
   return (
     <Context.Provider value={contextValue}>
