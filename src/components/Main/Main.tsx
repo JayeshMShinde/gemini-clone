@@ -12,7 +12,6 @@ interface FooterProps {
   input: string;
   setInput: (value: string) => void;
   onSent: (message: string) => void;
-  // Make sure this matches the original definition's modifiers
   handleKeyDown: (
     e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void;
@@ -29,12 +28,6 @@ interface ContextType {
   input?: string;
   extended: boolean;
 }
-
-// interface SuggestionCardProps {
-//   text: string;
-//   icon: string;
-//   onClick?: () => void;
-// }
 
 interface ResultViewProps {
   recentPrompt: string;
@@ -220,13 +213,13 @@ const Main: React.FC = () => {
     <div
       className={`
         flex flex-col min-h-screen bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200
-        ${extended ? "ml-64" : "ml-20"}
+        ${extended ? "lg:ml-64" : "lg:ml-20"} ml-0
         transition-all duration-300
       `}
     >
       <Header />
       <main className="flex-1 overflow-y-auto">
-        <div className="mx-auto px-6 md:px-20 lg:px-40 py-5">
+        <div className="mx-auto px-3 sm:px-6 md:px-12 lg:px-20 xl:px-40 py-3 sm:py-5">
           {!showResult ? (
             <InitialView />
           ) : (
@@ -252,7 +245,7 @@ const Main: React.FC = () => {
 // Initial View Components
 const InitialView: React.FC = () => {
   return (
-    <div className="py-12 max-w-6xl mx-auto">
+    <div className="py-6 sm:py-12 max-w-6xl mx-auto">
       <WelcomeMessage />
       <SuggestionGrid />
     </div>
@@ -261,11 +254,11 @@ const InitialView: React.FC = () => {
 
 const WelcomeMessage: React.FC = () => {
   return (
-    <div className="welcome-header">
-      <h1 className="welcome-title">
+    <div className="welcome-header text-center px-3">
+      <h1 className="welcome-title text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
         <span className="p-2 gradient-text">G-Clone</span>
       </h1>
-      <p className="welcome-subtitle">
+      <p className="welcome-subtitle text-lg sm:text-xl text-gray-600 dark:text-gray-300">
         How can I help you today?
       </p>
     </div>
@@ -300,7 +293,7 @@ const SuggestionGrid: React.FC = () => {
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-2">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 p-2 mt-6">
       {suggestions.map((suggestion, index) => (
         <SuggestionCard
           key={index}
@@ -324,11 +317,10 @@ const SuggestionCard = ({
 }) => {
   const { isDarkMode } = useContext(ThemeContext);
 
-  // Adding the 3D text effect to cards
   return (
     <div
       className={`
-      group h-[200px] p-6 rounded-2xl relative cursor-pointer
+      group h-[160px] sm:h-[200px] p-4 sm:p-6 rounded-2xl relative cursor-pointer
       transition-all duration-300 shadow-sm hover:shadow-md
       ${
         isDarkMode
@@ -338,7 +330,7 @@ const SuggestionCard = ({
     `}
       style={{ animationDelay: `${index * 0.1}s` }}
     >
-      <p className="text-gray-800 dark:text-gray-200 text-lg font-medium leading-relaxed text-3d">
+      <p className="text-gray-800 dark:text-gray-200 text-base sm:text-lg font-medium leading-relaxed text-3d">
         {text}
       </p>
       <div
@@ -347,7 +339,7 @@ const SuggestionCard = ({
         ${isDarkMode ? "bg-gray-700" : "bg-white"}
       `}
       >
-        <div className="w-8 h-8 flex items-center justify-center text-gray-700 dark:text-gray-300">
+        <div className="w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center text-gray-700 dark:text-gray-300">
           {iconComponent}
         </div>
       </div>
@@ -361,7 +353,7 @@ const ResultView: React.FC<ResultViewProps> = ({
   loading,
   resultData,
 }) => (
-  <div className="py-8 min-h-[calc(100vh-200px)] max-w">
+  <div className="py-4 sm:py-8 min-h-[calc(100vh-200px)] max-w">
     <UserPrompt prompt={recentPrompt} />
     <GeminiResponse loading={loading} resultData={resultData} />
   </div>
@@ -373,15 +365,15 @@ const UserPrompt: React.FC<{ prompt: string }> = ({ prompt }) => {
   return (
     <div
       className={`
-      flex items-start gap-5 mb-8 p-4 rounded-2xl
+      flex items-start gap-3 sm:gap-5 mb-6 sm:mb-8 p-3 sm:p-4 rounded-2xl
       ${isDarkMode ? "bg-gray-800" : "bg-gray-50"}
       animate-text-fade
     `}
     >
-      <div className="w-10 h-10 rounded-full shadow-sm overflow-hidden">
+      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full shadow-sm overflow-hidden flex-shrink-0">
         <UserIcon />
       </div>
-      <p className="flex-1 text-gray-800 dark:text-gray-200 leading-relaxed pt-1">
+      <p className="flex-1 text-gray-800 dark:text-gray-200 leading-relaxed text-sm sm:text-base pt-1">
         {prompt}
       </p>
     </div>
@@ -420,17 +412,17 @@ const GeminiResponse: React.FC<{ loading: boolean; resultData: string }> = ({
   return (
     <div
       className={`
-        flex items-start gap-5 p-4 rounded-2xl animate-text-fade
+        flex items-start gap-3 sm:gap-5 p-3 sm:p-4 rounded-2xl animate-text-fade
         ${isDarkMode ? "bg-blue-900/20" : "bg-blue-50"}
       `}
     >
-      <div className="w-10 h-10 flex-shrink-0 rounded-full shadow-sm overflow-hidden text-neon">
+      <div className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 rounded-full shadow-sm overflow-hidden text-neon">
         <GeminiIcon isDarkMode={isDarkMode} />
       </div>
       {loading ? (
-        <div className="overflow-hidden flex-1 flex justify-center py-8">
+        <div className="overflow-hidden flex-1 flex justify-center py-4 sm:py-8">
           <l-grid
-            size="100"
+            size="80"
             speed="2.8"
             color={isDarkMode ? "#90CAF9" : "#1E88E5"}
           />
@@ -438,7 +430,7 @@ const GeminiResponse: React.FC<{ loading: boolean; resultData: string }> = ({
       ) : (
         <div
           ref={responseRef}
-          className={`flex-1 prose prose-blue dark:prose-invert max-w-none overflow-x-auto leading-relaxed pt-1 ${
+          className={`flex-1 prose prose-sm sm:prose-base prose-blue dark:prose-invert max-w-none overflow-x-auto leading-relaxed pt-1 text-sm sm:text-base ${
             isTyping ? "enhanced-typing" : ""
           }`}
           dangerouslySetInnerHTML={{
@@ -458,6 +450,18 @@ const Footer: React.FC<FooterProps> = ({
 }) => {
   const { isDarkMode } = useContext(ThemeContext);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check for mobile viewport
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 640);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Auto-resize textarea based on content
   useEffect(() => {
@@ -484,7 +488,6 @@ const Footer: React.FC<FooterProps> = ({
       }
     } else {
       // Pass the event to the original handler
-      // Type casting to avoid type conflicts
       handleKeyDown(e as any);
     }
   };
@@ -492,7 +495,7 @@ const Footer: React.FC<FooterProps> = ({
   return (
     <footer
       className={`
-          sticky bottom-0 right-0 z-10
+          sticky bottom-0 right-0 z-10 w-full
           ${
             isDarkMode
               ? "bg-gray-900/95 border-t border-gray-700"
@@ -501,10 +504,10 @@ const Footer: React.FC<FooterProps> = ({
           backdrop-blur-md shadow-sm
         `}
     >
-      <div className="max-w-3xl mx-auto px-4 py-4">
+      <div className="max-w-3xl mx-auto px-2 sm:px-4 py-3 sm:py-4">
         <div
           className={`
-              flex items-center gap-4 px-6 py-3 rounded-full shadow-sm
+              flex items-center gap-2 sm:gap-4 px-3 sm:px-6 py-2 sm:py-3 rounded-full shadow-sm
               ${isDarkMode ? "bg-gray-800" : "bg-gray-50"}
             `}
         >
@@ -512,18 +515,22 @@ const Footer: React.FC<FooterProps> = ({
             ref={textareaRef}
             onChange={(e) => setInput(e.target.value)}
             value={input}
-            className="flex-1 bg-transparent border-none outline-none text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 resize-none overflow-hidden min-h-[24px] max-h-32"
-            placeholder="Enter a prompt here... (Shift+Enter for new line)"
+            className="flex-1 bg-transparent border-none outline-none text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 resize-none overflow-hidden min-h-[24px] max-h-32 text-sm sm:text-base"
+            placeholder={isMobile ? "Enter prompt..." : "Enter a prompt here... (Shift+Enter for new line)"}
             onKeyDown={handleTextareaKeyDown}
             rows={1}
           />
-          <div className="flex items-center gap-6">
-            <button className="hover:opacity-70 transition-opacity text-gray-700 dark:text-gray-300">
-              <GalleryIcon />
-            </button>
-            <button className="hover:opacity-70 transition-opacity text-gray-700 dark:text-gray-300">
-              <MicIcon />
-            </button>
+          <div className="flex items-center gap-3 sm:gap-6">
+            {!isMobile && (
+              <>
+                <button className="hover:opacity-70 transition-opacity text-gray-700 dark:text-gray-300">
+                  <GalleryIcon />
+                </button>
+                <button className="hover:opacity-70 transition-opacity text-gray-700 dark:text-gray-300">
+                  <MicIcon />
+                </button>
+              </>
+            )}
             <button
               onClick={() => input.trim() && onSent(input)}
               className={`
@@ -545,9 +552,8 @@ const Footer: React.FC<FooterProps> = ({
             </button>
           </div>
         </div>
-        <p className="text-sm text-center mt-3 text-gray-500 dark:text-gray-400 text-glow">
-          Gemini may display inaccurate info, including about people, so
-          double-check its responses. Your privacy and Gemini Apps.
+        <p className="text-xs sm:text-sm text-center mt-2 sm:mt-3 text-gray-500 dark:text-gray-400 text-glow px-2">
+          {isMobile ? "Gemini may display inaccurate info. Double-check responses." : "Gemini may display inaccurate info, including about people, so double-check its responses. Your privacy and Gemini Apps."}
         </p>
       </div>
     </footer>

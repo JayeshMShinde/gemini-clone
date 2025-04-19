@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { Context } from '../../context/context';
 import { ThemeContext } from '../../context/ThemeContext';
 
@@ -27,14 +27,14 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
     <div 
       onClick={onClick}
       className={`
-        flex items-center gap-3 p-3 rounded-lg transition-colors
+        flex items-center gap-3 p-2 md:p-3 rounded-lg transition-colors
         ${isDarkMode 
           ? 'hover:bg-gray-700 active:bg-gray-600' 
           : 'hover:bg-gray-200 active:bg-gray-300'}
         cursor-pointer
       `}
     >
-      {icon}
+      <div className="flex-shrink-0">{icon}</div>
       {extended && (
         <span className="text-gray-800 dark:text-gray-200 text-sm whitespace-nowrap overflow-hidden text-ellipsis">
           {text}
@@ -47,6 +47,27 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
 const Sidebar: React.FC = () => {
   const context = useContext<ContextType | null>(Context as any);
   const { isDarkMode } = useContext(ThemeContext);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 768);
+      // Auto-collapse sidebar on mobile
+      if (window.innerWidth < 768 && context?.extended) {
+        context.setExtended(false);
+      }
+    };
+
+    // Initial check
+    checkScreenSize();
+    
+    // Add resize listener
+    window.addEventListener('resize', checkScreenSize);
+    
+    // Clean up
+    return () => window.removeEventListener('resize', checkScreenSize);
+  }, [context]);
   
   if (!context) {
     return (
@@ -59,7 +80,11 @@ const Sidebar: React.FC = () => {
   const { extended, setExtended, previousPrompt = [] } = context;
 
   const handleToggleExtended = (): void => {
-    setExtended((prev: boolean) => !prev);
+    if (isMobile) {
+      setIsOpen(!isOpen);
+    } else {
+      setExtended((prev: boolean) => !prev);
+    }
   };
 
   const MenuIcon = () => (
@@ -98,91 +123,134 @@ const Sidebar: React.FC = () => {
     </svg>
   );
 
+  const CloseIcon = () => (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z" fill={isDarkMode ? "#90CAF9" : "#1E88E5"} />
+    </svg>
+  );
+  
+  // Mobile sidebar overlay
+  const mobileOverlay = isMobile && isOpen && (
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-50 z-10"
+      onClick={() => setIsOpen(false)}
+    />
+  );
+  
   return (
-    <aside 
-      className={`
-        fixed left-0 top-0 h-screen z-20
-        ${isDarkMode 
-          ? 'bg-gray-800 border-r border-gray-700' 
-          : 'bg-gray-50 border-r border-gray-200'}
-        flex flex-col justify-between
-        transition-all duration-300 ease-in-out
-        ${extended ? 'w-64' : 'w-20'}
-        p-4
-      `}
-    >
-      {/* Top Section */}
-      <div className="space-y-6">
-        {/* Menu Toggle */}
+    <>
+      {mobileOverlay}
+      <aside 
+        className={`
+          fixed left-0 top-0 h-screen z-20
+          ${isDarkMode 
+            ? 'bg-gray-800 border-r border-gray-700' 
+            : 'bg-gray-50 border-r border-gray-200'}
+          flex flex-col justify-between
+          transition-all duration-300 ease-in-out
+          ${isMobile 
+            ? isOpen ? 'w-64 translate-x-0' : 'w-64 -translate-x-full' 
+            : extended ? 'w-64' : 'w-16 md:w-20'}
+          p-3 md:p-4
+        `}
+      >
+        {/* Top Section */}
+        <div className="space-y-4 md:space-y-6">
+          {/* Menu Toggle */}
+          <div className="flex justify-between items-center">
+            <button
+              onClick={handleToggleExtended}
+              className={`
+                p-2 rounded-full transition-colors
+                ${isDarkMode 
+                  ? 'hover:bg-gray-700 active:bg-gray-600' 
+                  : 'hover:bg-gray-200 active:bg-gray-300'}
+              `}
+              type="button"
+              aria-label="Toggle sidebar"
+            >
+              {isMobile && isOpen ? <CloseIcon /> : <MenuIcon />}
+            </button>
+            
+            {isMobile && isOpen && (
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Menu</span>
+            )}
+          </div>
+
+          {/* New Chat Button */}
+          <div className="px-1">
+            <div 
+              role="button"
+              tabIndex={0}
+              className={`
+                flex items-center gap-3 p-2 md:p-3 rounded-lg cursor-pointer
+                ${isDarkMode 
+                  ? 'bg-gray-700 hover:bg-gray-600 active:bg-gray-500' 
+                  : 'bg-gray-200 hover:bg-gray-300 active:bg-gray-400'}
+                transition-colors
+              `}
+            >
+              <PlusIcon />
+              {(extended || (isMobile && isOpen)) && (
+                <span className="text-gray-800 dark:text-gray-200 text-sm">New Chat</span>
+              )}
+            </div>
+          </div>
+
+          {/* Recent Chats Section */}
+          {(extended || (isMobile && isOpen)) && previousPrompt && previousPrompt.length > 0 && (
+            <div className="mt-6 md:mt-8">
+              <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400 px-3 md:px-4 mb-2 md:mb-3">Recent</h2>
+              <div className="space-y-1 max-h-[40vh] md:max-h-[60vh] overflow-y-auto pr-2 sidebar-scroll">
+                {previousPrompt.map((item: string, index: number) => (
+                  <SidebarItem
+                    key={index}
+                    icon={<MessageIcon />}
+                    text={item.length > 25 ? `${item.slice(0, 25)}...` : item}
+                    extended={extended || (isMobile && isOpen)}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Bottom Section */}
+        <div className="space-y-1 mt-auto pt-3 md:pt-4 border-t dark:border-gray-700">
+          <SidebarItem
+            icon={<QuestionIcon />}
+            text="Help"
+            extended={extended || (isMobile && isOpen)}
+          />
+          <SidebarItem
+            icon={<HistoryIcon />}
+            text="Activity"
+            extended={extended || (isMobile && isOpen)}
+          />
+          <SidebarItem
+            icon={<SettingIcon />}
+            text="Settings"
+            extended={extended || (isMobile && isOpen)}
+          />
+        </div>
+      </aside>
+      
+      {/* Floating hamburger button on mobile when sidebar is closed */}
+      {isMobile && !isOpen && (
         <button
-          onClick={handleToggleExtended}
+          onClick={() => setIsOpen(true)}
           className={`
-            p-2 rounded-full transition-colors
+            fixed top-4 left-4 z-10 p-2 rounded-full shadow-md
             ${isDarkMode 
-              ? 'hover:bg-gray-700 active:bg-gray-600' 
-              : 'hover:bg-gray-200 active:bg-gray-300'}
+              ? 'bg-gray-800 text-gray-200' 
+              : 'bg-white text-gray-700'}
           `}
-          type="button"
-          aria-label="Toggle sidebar"
+          aria-label="Open sidebar"
         >
           <MenuIcon />
         </button>
-
-        {/* New Chat Button */}
-        <div className="px-1">
-          <div 
-            role="button"
-            tabIndex={0}
-            className={`
-              flex items-center gap-3 p-3 rounded-lg cursor-pointer
-              ${isDarkMode 
-                ? 'bg-gray-700 hover:bg-gray-600 active:bg-gray-500' 
-                : 'bg-gray-200 hover:bg-gray-300 active:bg-gray-400'}
-              transition-colors
-            `}
-          >
-            <PlusIcon />
-            {extended && <span className="text-gray-800 dark:text-gray-200 text-sm">New Chat</span>}
-          </div>
-        </div>
-
-        {/* Recent Chats Section */}
-        {extended && previousPrompt && previousPrompt.length > 0 && (
-          <div className="mt-8">
-            <h2 className="text-sm font-medium text-gray-500 dark:text-gray-400 px-4 mb-3">Recent</h2>
-            <div className="space-y-1 max-h-[60vh] overflow-y-auto pr-2 sidebar-scroll">
-              {previousPrompt.map((item: string, index: number) => (
-                <SidebarItem
-                  key={index}
-                  icon={<MessageIcon />}
-                  text={item.length > 25 ? `${item.slice(0, 25)}...` : item}
-                  extended={extended}
-                />
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Bottom Section */}
-      <div className="space-y-1 mt-auto pt-4 border-t dark:border-gray-700">
-        <SidebarItem
-          icon={<QuestionIcon />}
-          text="Help"
-          extended={extended}
-        />
-        <SidebarItem
-          icon={<HistoryIcon />}
-          text="Activity"
-          extended={extended}
-        />
-        <SidebarItem
-          icon={<SettingIcon />}
-          text="Settings"
-          extended={extended}
-        />
-      </div>
-    </aside>
+      )}
+    </>
   );
 };
 
