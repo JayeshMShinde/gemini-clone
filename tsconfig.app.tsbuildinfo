@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/assets/assets.ts","./src/components/main/header.tsx","./src/components/main/main.tsx","./src/components/sidebar/sidebar.tsx","./src/config/gemini.ts","./src/context/themecontext.tsx","./src/context/context.tsx"],"version":"5.8.3"}
