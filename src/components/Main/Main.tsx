@@ -38,8 +38,8 @@ interface ResultViewProps {
 // Icon SVG Components
 const GalleryIcon = () => (
   <svg
-    width="20"
-    height="20"
+    width="16"
+    height="16"
     viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -53,8 +53,8 @@ const GalleryIcon = () => (
 
 const MicIcon = () => (
   <svg
-    width="20"
-    height="20"
+    width="16"
+    height="16"
     viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -68,15 +68,15 @@ const MicIcon = () => (
 
 const SendIcon = ({ isDarkMode }: { isDarkMode: boolean }) => (
   <svg
-    width="20"
-    height="20"
+    width="16"
+    height="16"
     viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
   >
     <path
       d="M2.01 21L23 12L2.01 3L2 10L17 12L2 14L2.01 21Z"
-      fill={isDarkMode ? "#90CAF9" : "#1E88E5"}
+      fill="currentColor"
     />
   </svg>
 );
@@ -143,8 +143,8 @@ const CodeIcon = () => (
 
 const UserIcon = () => (
   <svg
-    width="40"
-    height="40"
+    width="28"
+    height="28"
     viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -159,8 +159,8 @@ const UserIcon = () => (
 
 const GeminiIcon = ({ isDarkMode }: { isDarkMode: boolean }) => (
   <svg
-    width="40"
-    height="40"
+    width="28"
+    height="28"
     viewBox="0 0 24 24"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
@@ -210,16 +210,10 @@ const Main: React.FC = () => {
   };
 
   return (
-    <div
-      className={`
-        flex flex-col min-h-screen bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200
-        ${extended ? "lg:ml-64" : "lg:ml-20"} ml-0
-        transition-all duration-300
-      `}
-    >
+    <div className="flex flex-col flex-1 h-screen overflow-hidden">
       <Header />
       <main className="flex-1 overflow-y-auto">
-        <div className="mx-auto px-3 sm:px-6 md:px-12 lg:px-20 xl:px-40 py-3 sm:py-5">
+        <div className="mx-auto px-3 sm:px-4 py-2 sm:py-3 max-w-3xl">
           {!showResult ? (
             <InitialView />
           ) : (
@@ -245,7 +239,7 @@ const Main: React.FC = () => {
 // Initial View Components
 const InitialView: React.FC = () => {
   return (
-    <div className="py-6 sm:py-12 max-w-6xl mx-auto">
+    <div className="py-4 sm:py-8">
       <WelcomeMessage />
       <SuggestionGrid />
     </div>
@@ -254,11 +248,11 @@ const InitialView: React.FC = () => {
 
 const WelcomeMessage: React.FC = () => {
   return (
-    <div className="welcome-header text-center px-3">
-      <h1 className="welcome-title text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
-        <span className="p-2 gradient-text">G-Clone</span>
+    <div className="text-center mb-6">
+      <h1 className="text-2xl sm:text-3xl font-bold mb-3">
+        <span className="gradient-text">Gemini Clone</span>
       </h1>
-      <p className="welcome-subtitle text-lg sm:text-xl text-gray-600 dark:text-gray-300">
+      <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
         How can I help you today?
       </p>
     </div>
@@ -293,7 +287,7 @@ const SuggestionGrid: React.FC = () => {
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 p-2 mt-6">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mt-4">
       {suggestions.map((suggestion, index) => (
         <SuggestionCard
           key={index}
@@ -320,26 +314,30 @@ const SuggestionCard = ({
   return (
     <div
       className={`
-      group h-[160px] sm:h-[200px] p-4 sm:p-6 rounded-2xl relative cursor-pointer
-      transition-all duration-300 shadow-sm hover:shadow-md
-      ${
-        isDarkMode
-          ? "bg-gray-800 hover:bg-gray-700 border border-gray-700"
-          : "bg-gray-50 hover:bg-gray-100 border border-gray-200"
-      }
-    `}
-      style={{ animationDelay: `${index * 0.1}s` }}
+        group h-24 sm:h-28 p-3 rounded-xl relative cursor-pointer
+        transition-all duration-300 border hover:shadow-md
+        ${
+          isDarkMode
+            ? "bg-gray-800/60 hover:bg-gray-700/80 border-gray-700/50"
+            : "bg-white/60 hover:bg-white/80 border-gray-200/50"
+        }
+        hover:-translate-y-1
+      `}
     >
-      <p className="text-gray-800 dark:text-gray-200 text-base sm:text-lg font-medium leading-relaxed text-3d">
+      <p className="text-gray-800 dark:text-gray-200 text-xs sm:text-sm font-medium leading-tight pr-8">
         {text}
       </p>
       <div
         className={`
-        absolute bottom-4 right-4 p-2 rounded-xl shadow-sm group-hover:shadow-md transition-all
-        ${isDarkMode ? "bg-gray-700" : "bg-white"}
-      `}
+          absolute bottom-2 right-2 p-1.5 rounded-lg transition-all duration-300
+          ${
+            isDarkMode 
+              ? "bg-blue-600/80" 
+              : "bg-blue-500/80"
+          }
+        `}
       >
-        <div className="w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center text-gray-700 dark:text-gray-300">
+        <div className="w-3 h-3 flex items-center justify-center text-white">
           {iconComponent}
         </div>
       </div>
@@ -353,7 +351,7 @@ const ResultView: React.FC<ResultViewProps> = ({
   loading,
   resultData,
 }) => (
-  <div className="py-4 sm:py-8 min-h-[calc(100vh-200px)] max-w">
+  <div className="py-3 sm:py-4 space-y-4">
     <UserPrompt prompt={recentPrompt} />
     <GeminiResponse loading={loading} resultData={resultData} />
   </div>
@@ -365,17 +363,22 @@ const UserPrompt: React.FC<{ prompt: string }> = ({ prompt }) => {
   return (
     <div
       className={`
-      flex items-start gap-3 sm:gap-5 mb-6 sm:mb-8 p-3 sm:p-4 rounded-2xl
-      ${isDarkMode ? "bg-gray-800" : "bg-gray-50"}
-      animate-text-fade
-    `}
+        flex items-start gap-3 p-3 rounded-xl border
+        ${
+          isDarkMode 
+            ? "bg-gray-800/40 border-gray-700/50" 
+            : "bg-gray-50/60 border-gray-200/50"
+        }
+      `}
     >
-      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full shadow-sm overflow-hidden flex-shrink-0">
+      <div className="w-7 h-7 rounded-full overflow-hidden flex-shrink-0">
         <UserIcon />
       </div>
-      <p className="flex-1 text-gray-800 dark:text-gray-200 leading-relaxed text-sm sm:text-base pt-1">
-        {prompt}
-      </p>
+      <div className="flex-1 pt-0.5">
+        <p className="text-gray-800 dark:text-gray-200 text-sm leading-relaxed">
+          {prompt}
+        </p>
+      </div>
     </div>
   );
 };
@@ -412,31 +415,37 @@ const GeminiResponse: React.FC<{ loading: boolean; resultData: string }> = ({
   return (
     <div
       className={`
-        flex items-start gap-3 sm:gap-5 p-3 sm:p-4 rounded-2xl animate-text-fade
-        ${isDarkMode ? "bg-blue-900/20" : "bg-blue-50"}
+        flex items-start gap-3 p-3 rounded-xl border
+        ${
+          isDarkMode 
+            ? "bg-gray-800/40 border-gray-700/50" 
+            : "bg-white/60 border-gray-200/50"
+        }
       `}
     >
-      <div className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 rounded-full shadow-sm overflow-hidden text-neon">
+      <div className="w-7 h-7 flex-shrink-0 rounded-full overflow-hidden">
         <GeminiIcon isDarkMode={isDarkMode} />
       </div>
       {loading ? (
-        <div className="overflow-hidden flex-1 flex justify-center py-4 sm:py-8">
+        <div className="flex-1 flex justify-center items-center py-4">
           <l-grid
-            size="80"
-            speed="2.8"
-            color={isDarkMode ? "#90CAF9" : "#1E88E5"}
+            size="40"
+            speed="1.5"
+            color={isDarkMode ? "#60A5FA" : "#3B82F6"}
           />
         </div>
       ) : (
-        <div
-          ref={responseRef}
-          className={`flex-1 prose prose-sm sm:prose-base prose-blue dark:prose-invert max-w-none overflow-x-auto leading-relaxed pt-1 text-sm sm:text-base ${
-            isTyping ? "enhanced-typing" : ""
-          }`}
-          dangerouslySetInnerHTML={{
-            __html: isTyping ? displayedText : resultData,
-          }}
-        />
+        <div className="flex-1 pt-0.5">
+          <div
+            ref={responseRef}
+            className={`prose prose-sm prose-blue dark:prose-invert max-w-none leading-relaxed ${
+              isTyping ? "enhanced-typing" : ""
+            }`}
+            dangerouslySetInnerHTML={{
+              __html: isTyping ? displayedText : resultData,
+            }}
+          />
+        </div>
       )}
     </div>
   );
@@ -495,38 +504,42 @@ const Footer: React.FC<FooterProps> = ({
   return (
     <footer
       className={`
-          sticky bottom-0 right-0 z-10 w-full
-          ${
-            isDarkMode
-              ? "bg-gray-900/95 border-t border-gray-700"
-              : "bg-white/95 border-t border-gray-200"
-          }
-          backdrop-blur-md shadow-sm
-        `}
+        sticky bottom-0 right-0 z-10 w-full
+        ${
+          isDarkMode
+            ? "bg-gray-900/95 border-t border-gray-700/50"
+            : "bg-white/95 border-t border-gray-200/50"
+        }
+        backdrop-blur-xl
+      `}
     >
-      <div className="max-w-3xl mx-auto px-2 sm:px-4 py-3 sm:py-4">
+      <div className="max-w-3xl mx-auto px-3 sm:px-4 py-3">
         <div
           className={`
-              flex items-center gap-2 sm:gap-4 px-3 sm:px-6 py-2 sm:py-3 rounded-full shadow-sm
-              ${isDarkMode ? "bg-gray-800" : "bg-gray-50"}
-            `}
+            flex items-end gap-2 px-3 py-2 rounded-2xl border transition-all duration-300
+            ${
+              isDarkMode 
+                ? "bg-gray-800/60 border-gray-600/50 focus-within:border-blue-500/50" 
+                : "bg-white/80 border-gray-300/50 focus-within:border-blue-400/50"
+            }
+          `}
         >
           <textarea
             ref={textareaRef}
             onChange={(e) => setInput(e.target.value)}
             value={input}
-            className="flex-1 bg-transparent border-none outline-none text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 resize-none overflow-hidden min-h-[24px] max-h-32 text-sm sm:text-base"
-            placeholder={isMobile ? "Enter prompt..." : "Enter a prompt here... (Shift+Enter for new line)"}
+            className="flex-1 bg-transparent border-none outline-none text-gray-800 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 resize-none overflow-hidden min-h-[24px] max-h-24 text-sm leading-relaxed"
+            placeholder={isMobile ? "Ask me anything..." : "Ask me anything..."}
             onKeyDown={handleTextareaKeyDown}
             rows={1}
           />
-          <div className="flex items-center gap-3 sm:gap-6">
+          <div className="flex items-center gap-1">
             {!isMobile && (
               <>
-                <button className="hover:opacity-70 transition-opacity text-gray-700 dark:text-gray-300">
+                <button className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all text-gray-600 dark:text-gray-400">
                   <GalleryIcon />
                 </button>
-                <button className="hover:opacity-70 transition-opacity text-gray-700 dark:text-gray-300">
+                <button className="p-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-all text-gray-600 dark:text-gray-400">
                   <MicIcon />
                 </button>
               </>
@@ -534,26 +547,21 @@ const Footer: React.FC<FooterProps> = ({
             <button
               onClick={() => input.trim() && onSent(input)}
               className={`
-                    p-2 rounded-full transition-colors
-                    ${
-                      input.trim()
-                        ? "opacity-100 text-rainbow"
-                        : "opacity-50 cursor-not-allowed"
-                    }
-                    ${
-                      isDarkMode
-                        ? "hover:bg-gray-700 active:bg-gray-600"
-                        : "hover:bg-gray-200 active:bg-gray-300"
-                    }
-                  `}
+                p-2 rounded-xl transition-all duration-300
+                ${
+                  input.trim()
+                    ? "bg-blue-600 hover:bg-blue-700 text-white"
+                    : "bg-gray-200 dark:bg-gray-700 text-gray-400 cursor-not-allowed"
+                }
+              `}
               disabled={!input.trim()}
             >
               <SendIcon isDarkMode={isDarkMode} />
             </button>
           </div>
         </div>
-        <p className="text-xs sm:text-sm text-center mt-2 sm:mt-3 text-gray-500 dark:text-gray-400 text-glow px-2">
-          {isMobile ? "Gemini may display inaccurate info. Double-check responses." : "Gemini may display inaccurate info, including about people, so double-check its responses. Your privacy and Gemini Apps."}
+        <p className="text-xs text-center mt-2 text-gray-500 dark:text-gray-400">
+          AI may display inaccurate info. Double-check responses.
         </p>
       </div>
     </footer>

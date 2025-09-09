@@ -50,34 +50,32 @@
 
 /* Enhanced Vibrant Gradient Text with Directional Movement */
 .gradient-text {
-  /* Change to handwritten font with fallback */
-  font-family: "Roboto Condensed", cursive;
+  /* Modern font with fallback */
+  font-family: "Roboto Condensed", sans-serif;
   
-  /* Keep the gradient animation */
-  background: linear-gradient(90deg, #ff6b6b, #5463ec, #ee5bc0, #fdb43d, #ff6b6b);
-  background-size: 200% 100%;
-  animation: gradientFlow 8s ease infinite;
+  /* Enhanced gradient animation */
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
+  background-size: 300% 300%;
+  animation: gradientFlow 6s ease infinite;
   background-clip: text;
   -webkit-background-clip: text;
   color: transparent;
   
-  /* Add handwritten characteristics */
-  font-size: 1.5em; /* Slightly larger for better visibility */
-  letter-spacing: 1px; /* Irregular spacing */
-  transform: rotate(-1deg); /* Slight tilt for natural feel */
-  transition: all 0.3s ease;
-  padding: 0.25rem 0;
+  /* Modern characteristics */
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   display: inline-block;
   
-  /* Add subtle text shadow for depth */
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+  /* Enhanced text shadow for depth */
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 }
 
 .gradient-text:hover {
-  filter: brightness(1.2);
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2)) brightness(1.1);
   animation-duration: 3s;
-  transform: rotate(0deg) scale(1.05); /* Straightens and slightly enlarges */
+  transform: scale(1.05);
 }
 
 /* Add subtle underline effect to gradient text */
@@ -85,20 +83,22 @@
   content: '';
   position: absolute;
   left: 0;
-  bottom: 0;
+  bottom: -4px;
   width: 100%;
-  height: 3px;
-  background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1, #96c93d, #ff6b6b);
-  background-size: 200% 100%;
-  animation: gradientFlow 8s linear infinite;
-  border-radius: 3px;
+  height: 4px;
+  background: linear-gradient(135deg, #667eea, #764ba2, #f093fb, #f5576c, #4facfe);
+  background-size: 300% 300%;
+  animation: gradientFlow 6s ease infinite;
+  border-radius: 2px;
   transform: scaleX(0);
   transform-origin: left;
-  transition: transform 0.5s ease;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0.8;
 }
 
 .gradient-text:hover::after {
   transform: scaleX(1);
+  opacity: 1;
 }
 
 /* Glassmorphism Response Containers */
@@ -308,4 +308,108 @@ table td {
 /* Links with Hover Effects */
 a {
   @apply text-indigo-500 dark:text-indigo-400 transition-all duration-300 hover:text-indigo-700 dark:hover:text-indigo-300 hover:underline hover:drop-shadow-md;
+}
+
+/* Custom Scrollbar */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.5);
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.7);
+}
+
+/* Enhanced Animations */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-slide-up {
+  animation: slideInUp 0.6s ease-out;
+}
+
+.animate-slide-left {
+  animation: slideInLeft 0.6s ease-out;
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Glass Effect */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glass-effect-dark {
+  background: rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Improved Focus States */
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #3B82F6;
+  outline-offset: 2px;
+}
+
+/* Enhanced Card Shadows */
+.card-shadow {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.card-shadow-hover {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Smooth Transitions */
+* {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
 }
